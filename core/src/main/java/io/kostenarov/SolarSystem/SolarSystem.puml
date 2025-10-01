@@ -1,0 +1,84 @@
+@startuml
+
+class SolarSystem {
+    - planets: List<PlanetaryBody>
+    - sun: Star
+    + getPlanets(): List<PlanetaryBody>
+    + getSun(): Star
+    + addPlanet(planet: PlanetaryBody): void
+    + removePlanet(planet: PlanetaryBody): void
+}
+
+class PlanetaryBodyActor {
+    - object: PlanetaryBody
+    + createPlanetaryBody(name: String, mass: double, radius: double): PlanetaryBody
+    + deletePlanetaryBody(planetaryBody: PlanetaryBody): void
+}
+
+class SolarSystemActor {
+    - solarSystem: SolarSystem
+    + createSolarSystem(): SolarSystem
+    + deleteSolarSystem(solarSystem: SolarSystem): void
+}
+
+class PlanetaryBody {
+    - name: String
+    - mass: double
+    - radius: double
+    + getName(): String
+    + getMass(): double
+    + getRadius(): double
+}
+
+class Star {
+    - luminosity: double
+    + getLuminosity(): double
+}
+
+class Planet {
+    - distanceFromSun: double
+    - moons: List<Moon>
+    + getDistanceFromSun(): double
+    + getMoons(): List<Moon>
+    + addMoon(moon: Moon): void
+    + removeMoon(moon: Moon): void
+}
+
+class Moon {
+    - distanceFromPlanet: double
+    + getName(): String
+    + getMass(): double
+    + getRadius(): double
+    + getDistanceFromPlanet(): double
+}
+
+class KeplerianOrbit {
+    - semiMajorAxis: double
+    - eccentricity: double
+    - inclination: double
+    + getSemiMajorAxis(): double
+    + getEccentricity(): double
+    + getInclination(): double
+}
+
+class BarycenterCalculator {
+    + calculateBarycenter(body1: PlanetaryBody, body2: PlanetaryBody): Point3D
+    + calculateBarycenter(bodies: List<PlanetaryBody>): Point3D
+}
+
+SolarSystem "1" o-- "many" PlanetaryBody : contains
+SolarSystem "1" o-- "1" Star : has
+PlanetaryBody <|-- Star
+PlanetaryBody <|-- Planet
+PlanetaryBody <|-- Moon
+Planet "1" o-- "many" Moon : has
+
+PlanetaryBodyActor ..> Planet : manages
+PlanetaryBodyActor ..> Moon : manages
+PlanetaryBodyActor ..> Star : manages
+
+SolarSystemActor ..> SolarSystem : manages
+
+BarycenterCalculator ..> PlanetaryBody : uses
+
+@enduml
