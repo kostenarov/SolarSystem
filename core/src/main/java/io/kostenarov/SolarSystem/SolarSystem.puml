@@ -1,18 +1,18 @@
 @startuml
 
 class SolarSystem {
-    - planets: List<PlanetaryBody>
+    - Bodies: List<Body>
     - sun: Star
-    + getPlanets(): List<PlanetaryBody>
+    + getBodies(): List<Body>
     + getSun(): Star
-    + addPlanet(planet: PlanetaryBody): void
-    + removePlanet(planet: PlanetaryBody): void
+    + addBody(body: Body): void
+    + removeBody(body: Body): void
 }
 
-class PlanetaryBodyActor {
-    - object: PlanetaryBody
-    + createPlanetaryBody(name: String, mass: double, radius: double): PlanetaryBody
-    + deletePlanetaryBody(planetaryBody: PlanetaryBody): void
+class BodyActor {
+    - object: Body
+    + createBody(name: String, mass: double, radius: double): Body
+    + deleteBody(body: Body): void
 }
 
 class SolarSystemActor {
@@ -21,7 +21,7 @@ class SolarSystemActor {
     + deleteSolarSystem(solarSystem: SolarSystem): void
 }
 
-class PlanetaryBody {
+class Body {
     - name: String
     - mass: double
     - radius: double
@@ -35,7 +35,7 @@ class Star {
     + getLuminosity(): double
 }
 
-class Planet {
+class Body {
     - distanceFromSun: double
     - moons: List<Moon>
     + getDistanceFromSun(): double
@@ -45,11 +45,11 @@ class Planet {
 }
 
 class Moon {
-    - distanceFromPlanet: double
+    - distanceFromBody: double
     + getName(): String
     + getMass(): double
     + getRadius(): double
-    + getDistanceFromPlanet(): double
+    + getDistanceFromBody(): double
 }
 
 class KeplerianOrbit {
@@ -62,23 +62,26 @@ class KeplerianOrbit {
 }
 
 class BarycenterCalculator {
-    + calculateBarycenter(body1: PlanetaryBody, body2: PlanetaryBody): Point3D
-    + calculateBarycenter(bodies: List<PlanetaryBody>): Point3D
+    + calculateBarycenter(body1: Body, body2: Body): Point3D
+    + calculateBarycenter(bodies: List<Body>): Point3D
 }
 
-SolarSystem "1" o-- "many" PlanetaryBody : contains
+SolarSystem "1" o-- "many" Body : contains
 SolarSystem "1" o-- "1" Star : has
-PlanetaryBody <|-- Star
-PlanetaryBody <|-- Planet
-PlanetaryBody <|-- Moon
-Planet "1" o-- "many" Moon : has
+Body <|-- Star
+Body <|-- Body
+Body <|-- Moon
+Body "1" o-- "many" Moon : has
 
-PlanetaryBodyActor ..> Planet : manages
-PlanetaryBodyActor ..> Moon : manages
-PlanetaryBodyActor ..> Star : manages
+BodyActor ..> Body : manages
+BodyActor ..> Moon : manages
+BodyActor ..> Star : manages
 
 SolarSystemActor ..> SolarSystem : manages
 
-BarycenterCalculator ..> PlanetaryBody : uses
+BarycenterCalculator ..> Body : uses
+KeplerianOrbit ..> Body : describes orbit of
+KeplerianOrbit ..> Star : describes orbit of
+KeplerianOrbit ..> Moon : describes orbit of
 
 @enduml
