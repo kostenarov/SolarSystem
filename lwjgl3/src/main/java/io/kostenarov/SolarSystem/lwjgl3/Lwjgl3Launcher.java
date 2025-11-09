@@ -2,13 +2,18 @@ package io.kostenarov.SolarSystem.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import io.kostenarov.SolarSystem.Classes.SolarSystemVisualiser;
 import io.kostenarov.SolarSystem.Main;
 
-/** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
-    public static void main(String[] args) {
-        if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS support and helps on Windows.
-        createApplication();
+    public static void main (String[] arg) {
+        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        config.setTitle("Solar System Simulation");
+        config.setWindowIcon("textures/deathstar.png");
+        config.setWindowedMode(1280, 720);
+        config.useVsync(true);
+        config.setForegroundFPS(120);
+        new Lwjgl3Application(new SolarSystemVisualiser(), config);
     }
 
     private static Lwjgl3Application createApplication() {
