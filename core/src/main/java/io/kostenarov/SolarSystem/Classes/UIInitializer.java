@@ -150,6 +150,7 @@ public class UIInitializer {
         pixmap.dispose();
 
         skin.add("list-item-up", skin.newDrawable("white", new Color(0.2f, 0.2f, 0.2f, 1f)), Drawable.class);
+        skin.add("list-item-up", skin.newDrawable("white", new Color(0.2f, 0.2f, 0.2f, 1)), Drawable.class);
         skin.add("list-item-over", skin.newDrawable("white", Color.GRAY), Drawable.class);
         skin.add("list-item-down", skin.newDrawable("white", Color.LIGHT_GRAY), Drawable.class);
 
@@ -163,6 +164,7 @@ public class UIInitializer {
 
         ScrollPane.ScrollPaneStyle scrollPaneStyle = new ScrollPane.ScrollPaneStyle();
         scrollPaneStyle.background = skin.newDrawable("white", new Color(0.1f, 0.1f, 0.1f, 1f));
+        scrollPaneStyle.background = skin.newDrawable("white", new Color(0.1f, 0.1f, 0.1f, 1));
         scrollPaneStyle.vScroll = skin.newDrawable("white", Color.GRAY);
         scrollPaneStyle.vScrollKnob = skin.newDrawable("white", Color.LIGHT_GRAY);
         skin.add("default", scrollPaneStyle);
@@ -178,7 +180,8 @@ public class UIInitializer {
         sliderStyle.knob = skin.newDrawable("white", Color.LIGHT_GRAY);
         sliderStyle.knobDown = skin.newDrawable("white", Color.GRAY);
         sliderStyle.knobOver = skin.newDrawable("white", Color.GRAY);
-        skin.add("default", sliderStyle);
+        // register under the name expected by Slider for a horizontal style
+        skin.add("default-horizontal", sliderStyle, Slider.SliderStyle.class);
 
         return skin;
     }
@@ -202,6 +205,9 @@ public class UIInitializer {
         pixmap.setColor(Color.GREEN);
         // draw a right-pointing triangle
         pixmap.fillTriangle(5, 4, 5, 16, 16, 10);
+        pixmap.setColor(Color.RED);
+        pixmap.fillRectangle(0, 0, 8, 20);
+        pixmap.fillRectangle(12, 0, 8, 20);
         Texture texture = new Texture(pixmap);
         pixmap.dispose();
         return texture;
@@ -256,7 +262,6 @@ public class UIInitializer {
         speedValueLabel = new Label(String.format("%.1fx", simulationSpeed), skin);
         speedValueLabel.setPosition(230, (float) Gdx.graphics.getHeight() / 7 - 10);
         stage.addActor(speedValueLabel);
-
         bodyTable = new Table(skin);
         bodyTable.top().left();
 
@@ -328,6 +333,8 @@ public class UIInitializer {
         pauseButton.getStyle().imageChecked = d;
         // update actor's drawable if necessary
         pauseButton.getStyle().imageUp = d;
+        //pauseButton.setSize(pauseButton.getWidth() - pauseButton.getWidth() / Gdx.graphics.getWidth(),
+            //pauseButton.getHeight() - pauseButton.getHeight() / Gdx.graphics.getHeight());
     }
 
     public void pauseButton() {
@@ -344,6 +351,8 @@ public class UIInitializer {
             }
         });
         stage.addActor(pauseButton);
+        stage.addActor(pauseButton);
+
     }
 
     public void dispose() {
