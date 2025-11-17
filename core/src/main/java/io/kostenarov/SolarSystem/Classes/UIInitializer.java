@@ -29,6 +29,7 @@ public class UIInitializer {
     private BodySelectionListener listener;
     private Texture pauseTexture;
     private Texture bottomMenuTexture;
+    private Image bottomMenuImage; // new field
 
     public interface BodySelectionListener {
         void onBodySelected(CelestialBody body);
@@ -159,6 +160,12 @@ public class UIInitializer {
     }
 
     private void initializeUi() {
+        // create bottom menu image and make it stretch across the screen
+        bottomMenuImage = new Image(bottomMenuTexture);
+        bottomMenuImage.setPosition(0, 0);
+        bottomMenuImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() / 6.5f);
+        stage.addActor(bottomMenuImage);
+
         toggleButton = new TextButton("Select Body", skin);
         toggleButton.setPosition(10, Gdx.graphics.getHeight() - toggleButton.getHeight() - 10);
         toggleButton.addListener(new ChangeListener() {
@@ -167,8 +174,10 @@ public class UIInitializer {
                 dropdownContainer.setVisible(!dropdownContainer.isVisible());
             }
         });
+        // add toggle after bottom menu so it appears on top
         stage.addActor(toggleButton);
-        stage.addActor(new Image(bottomMenuTexture));
+
+        stage.addActor(new Image()); // placeholder to keep ordering similar if needed
 
         pauseButton();
 
@@ -225,9 +234,15 @@ public class UIInitializer {
         float newY = height - toggleButton.getHeight() - dropdownContainer.getPrefHeight() - 20;
         dropdownContainer.setPosition(10, newY);
 
+        // update bottom menu size to stretch across screen
+        if (bottomMenuImage != null) {
+            bottomMenuImage.setPosition(0, 0);
+            bottomMenuImage.setSize(width, (float) height / 6.5f);
+        }
+
         pauseButton.setPosition((width - pauseButton.getWidth()) / 2, (float) height / 7 - pauseButton.getHeight() - 10);
         //pauseButton.setSize(pauseButton.getWidth() - pauseButton.getWidth() / Gdx.graphics.getWidth(),
-            //pauseButton.getHeight() - pauseButton.getHeight() / Gdx.graphics.getHeight());
+        //pauseButton.getHeight() - pauseButton.getHeight() / Gdx.graphics.getHeight());
 
     }
 
@@ -244,5 +259,6 @@ public class UIInitializer {
         if (stage != null) stage.dispose();
         if (skin != null) skin.dispose();
         if (pauseTexture != null) pauseTexture.dispose();
+        if (bottomMenuTexture != null) bottomMenuTexture.dispose();
     }
 }

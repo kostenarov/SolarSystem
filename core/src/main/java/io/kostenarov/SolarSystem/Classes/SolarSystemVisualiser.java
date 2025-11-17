@@ -11,26 +11,34 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+import static com.badlogic.gdx.math.MathUtils.random;
+
 
 public class SolarSystemVisualiser extends ApplicationAdapter implements UIInitializer.BodySelectionListener {
+    private int ringCount = 30;
+    private float AU;
+
+    private Color[] ringColors = new Color[ringCount];
+
     private OrthographicCamera camera;
     private Renderer renderer;
     private PhysicsEngine engine;
     private Array<CelestialBody> bodies;
     private CelestialBody followTarget;
+    private CelestialBody resetPoint;
 
     private ShapeRenderer starRenderer;
+    private ShapeRenderer ringRenderer; // added for rings
     private Array<Vector2> stars;
 
     private static final long STAR_COUNT = 250000;
     private static final float STAR_FIELD_RADIUS_MULTIPLIER = 1000000;
     private static final float VISUAL_RADIUS_SCALE = 400f;
-    private static final float TIME_STEP = 60 * 600;
-    private static final int TRAIL_MAX_POINTS = 1000;
+    private static final float TIME_STEP = 60 * 60; //1 minutes per frame
+    private static final int TRAIL_MAX_POINTS = 100000;
 
     private UIInitializer uiInitializer;
     private BodyInitializer bodyInitializer;
-    private float AU;
 
     @Override
     public void create() {
@@ -45,12 +53,24 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
 
         renderer = new Renderer();
         starRenderer = new ShapeRenderer();
+        ringRenderer = new ShapeRenderer(); // initialize ring renderer
         generateStars(AU);
 
         uiInitializer = new UIInitializer(bodies, this);
         Gdx.input.setInputProcessor(uiInitializer.getStage());
 
         engine = new PhysicsEngine(bodies);
+        for (CelestialBody body : bodies) {
+            if ("Sun".equals(body.getName())) {
+                resetPoint = body;
+                break;
+            }
+        }
+
+        for(int i = 0; i < ringCount; i++) {
+            ringColors[i] = getRandomStarColor();
+        }
+
     }
 
     @Override
@@ -62,8 +82,8 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         stars = new Array<>((int) STAR_COUNT);
         float range = STAR_FIELD_RADIUS_MULTIPLIER * AU;
         for (int i = 0; i < STAR_COUNT; i++) {
-            float x = MathUtils.random(-range, range);
-            float y = MathUtils.random(-range, range);
+            float x = random(-range, range);
+            float y = random(-range, range);
             stars.add(new Vector2(x, y));
         }
     }
@@ -98,9 +118,29 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-            camera.position.set(0, 0, 0);
+            // Reset camera to Sun's position but do not enable follow
+            if (resetPoint != null) {
+                Vector2 p = resetPoint.getPosition();
+                camera.position.set(p.x, p.y, 0);
+            } else {
+                camera.position.set(0, 0, 0);
+            }
+            followTarget = null;
             camera.zoom = 5 * AU / Gdx.graphics.getWidth();
+            camera.update();
         }
+    }
+
+    public void resetToSun() {
+        if (resetPoint != null) {
+            Vector2 p = resetPoint.getPosition();
+            camera.position.set(p.x, p.y, 0);
+        } else {
+            camera.position.set(0, 0, 0);
+        }
+        followTarget = null;
+        camera.zoom = 5 * AU / Gdx.graphics.getWidth();
+        camera.update();
     }
 
     @Override
@@ -133,8 +173,47 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
 
         renderer.render(camera, bodies, VISUAL_RADIUS_SCALE);
 
+        ringRenderer.setProjectionMatrix(camera.combined);
+        ringRenderer.begin(ShapeRenderer.ShapeType.Line);
+        for (CelestialBody b : bodies) {
+            try {
+                if (b.hasRings()) {
+                    Vector2 pos = b.getPosition();
+                    float visualRadius = b.getRadius() * VISUAL_RADIUS_SCALE;
+
+                    float inner = visualRadius * 1.5f;
+                    float outer = visualRadius * 2.5f;
+                    int segments = 128;
+
+                    int steps = 30;
+                    for (int s = 0; s < steps; s++) {
+                        float t = s / (float) Math.max(1, steps - 1);
+                        float r = inner + (outer - inner) * t;
+                        ringRenderer.setColor(ringColors[s]);
+                        ringRenderer.circle(pos.x, pos.y, r, segments);
+                    }
+                }
+            } catch (Throwable ignored) {
+
+            }
+        }
+        ringRenderer.end();
+
         uiInitializer.getStage().act(Gdx.graphics.getDeltaTime());
         uiInitializer.getStage().draw();
+    }
+
+    private Color getRandomStarColor() {
+        float chance = MathUtils.random();
+        if (chance < 0.25f) {
+            return Color.WHITE;
+        } else if (chance < 0.50f) {
+            return Color.LIGHT_GRAY;
+        } else if (chance < 0.75f) {
+            return Color.BROWN;
+        } else {
+            return Color.ORANGE;
+        }
     }
 
     @Override
@@ -149,6 +228,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     public void dispose() {
         renderer.dispose();
         if (starRenderer != null) starRenderer.dispose();
+        if (ringRenderer != null) ringRenderer.dispose();
 
         uiInitializer.dispose();
     }

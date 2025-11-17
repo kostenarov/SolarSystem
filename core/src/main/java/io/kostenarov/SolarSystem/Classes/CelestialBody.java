@@ -9,6 +9,7 @@ public class CelestialBody {
     public final float mass;
     public final float radius;
     public final Color color;
+    public boolean hasRings = false;
 
     public Vector2 position;
     public Vector2 velocity;
@@ -16,13 +17,18 @@ public class CelestialBody {
 
     private final Array<Vector2> trail = new Array<>();
 
-    public CelestialBody(String name, float mass, float radius, Color color, Vector2 position, Vector2 velocity) {
+    public CelestialBody(String name, float mass, float radius, Color color, Vector2 position, Vector2 velocity, boolean hasRings) {
         this.name = name;
         this.mass = mass;
         this.radius = radius;
         this.color = color;
         this.position = position;
         this.velocity = velocity;
+        this.hasRings = hasRings;
+    }
+
+    public CelestialBody(String name, float mass, float radius, Color color, Vector2 position, Vector2 velocity) {
+        this(name, mass, radius, color, position, velocity, false);
     }
 
     public String getName() { return name; }
@@ -31,7 +37,7 @@ public class CelestialBody {
     public Color getColor() { return color; }
     public Vector2 getPosition() { return position; }
     public Vector2 getVelocity() { return velocity; }
-
+    public boolean hasRings() { return  hasRings; }
     public Array<Vector2> getTrail() { return trail; }
 
     public void addTrailPoint(Vector2 pos, int maxPoints) {

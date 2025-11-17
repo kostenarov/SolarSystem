@@ -40,11 +40,16 @@ public class PhysicsEngine {
             }
         }
 
-
         for (CelestialBody body : bodies) {
             body.velocity.mulAdd(body.acceleration, deltaTime);
             body.position.mulAdd(body.velocity, deltaTime);
         }
     }
+
+    //Runge kutta
+    //adams bashforth
+    //ppn method
+    //3d vector
+    //accurate poses - jpl horizons
 }
 
