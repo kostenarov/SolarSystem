@@ -154,7 +154,8 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
 
         camera.update();
 
-        engine.update(TIME_STEP);
+        if(!uiInitializer.isPaused())
+            engine.update(TIME_STEP);
 
         for (CelestialBody b : bodies) {
             b.addTrailPoint(b.getPosition(), TRAIL_MAX_POINTS);
