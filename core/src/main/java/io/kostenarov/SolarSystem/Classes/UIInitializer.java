@@ -30,6 +30,9 @@ public class UIInitializer {
     private Texture pauseTexture;
     private Texture bottomMenuTexture;
     private Image bottomMenuImage; // new field
+    private CheckBox displayMoonTrailsCheckbox;
+    private boolean isPaused = false;
+    private boolean isDisplayingMoonTrails = true;
 
     public interface BodySelectionListener {
         void onBodySelected(CelestialBody body);
@@ -98,10 +101,12 @@ public class UIInitializer {
         skin = createBasicSkin();
         pauseTexture = createPauseButtonTexture();
         bottomMenuTexture = initBottomMenu();
+        createDisplayMoonTrailsCheckbox();
         initializeUi();
         updateBodyList(bodies);
     }
 
+    // java
     private Skin createBasicSkin() {
         Skin skin = new Skin();
 
@@ -137,8 +142,17 @@ public class UIInitializer {
         labelStyle.fontColor = Color.WHITE;
         skin.add("default", labelStyle);
 
+        // Add CheckBox style so new CheckBox(..., skin) can find "default"
+        CheckBox.CheckBoxStyle checkBoxStyle = new CheckBox.CheckBoxStyle();
+        checkBoxStyle.checkboxOn = skin.newDrawable("white", Color.WHITE); // visible when checked
+        checkBoxStyle.checkboxOff = skin.newDrawable("white", Color.DARK_GRAY); // visible when unchecked
+        checkBoxStyle.font = skin.getFont("default");
+        checkBoxStyle.fontColor = Color.WHITE;
+        skin.add("default", checkBoxStyle);
+
         return skin;
     }
+
 
     private Texture createPauseButtonTexture() {
         Pixmap pixmap = new Pixmap(20, 20, Pixmap.Format.RGBA8888);
@@ -157,6 +171,19 @@ public class UIInitializer {
         Texture texture = new Texture(pixmap);
         pixmap.dispose();
         return texture;
+    }
+
+    private void createDisplayMoonTrailsCheckbox() {
+        displayMoonTrailsCheckbox = new CheckBox(" Display Moon Trails", skin);
+        displayMoonTrailsCheckbox.setPosition(10, Gdx.graphics.getHeight() / 6 + 20);
+        displayMoonTrailsCheckbox.setChecked(true);
+        displayMoonTrailsCheckbox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                isDisplayingMoonTrails = displayMoonTrailsCheckbox.isChecked();
+            }
+        });
+        stage.addActor(displayMoonTrailsCheckbox);
     }
 
     private void initializeUi() {
@@ -261,4 +288,7 @@ public class UIInitializer {
         if (pauseTexture != null) pauseTexture.dispose();
         if (bottomMenuTexture != null) bottomMenuTexture.dispose();
     }
+
+    public boolean isPaused() { return isPaused; }
+    public boolean isDisplayingMoonTrails() { return isDisplayingMoonTrails; }
 }

@@ -10,6 +10,7 @@ public class CelestialBody {
     public final float radius;
     public final Color color;
     public boolean hasRings = false;
+    public boolean isMoon = false;
 
     public Vector2 position;
     public Vector2 velocity;
@@ -17,7 +18,7 @@ public class CelestialBody {
 
     private final Array<Vector2> trail = new Array<>();
 
-    public CelestialBody(String name, float mass, float radius, Color color, Vector2 position, Vector2 velocity, boolean hasRings) {
+    public CelestialBody(String name, float mass, float radius, Color color, Vector2 position, Vector2 velocity, boolean hasRings, boolean isMoon) {
         this.name = name;
         this.mass = mass;
         this.radius = radius;
@@ -25,10 +26,11 @@ public class CelestialBody {
         this.position = position;
         this.velocity = velocity;
         this.hasRings = hasRings;
+        this.isMoon = isMoon;
     }
 
     public CelestialBody(String name, float mass, float radius, Color color, Vector2 position, Vector2 velocity) {
-        this(name, mass, radius, color, position, velocity, false);
+        this(name, mass, radius, color, position, velocity, false, false);
     }
 
     public String getName() { return name; }

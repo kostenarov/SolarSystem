@@ -34,7 +34,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     private static final long STAR_COUNT = 250000;
     private static final float STAR_FIELD_RADIUS_MULTIPLIER = 1000000;
     private static final float VISUAL_RADIUS_SCALE = 400f;
-    private static final float TIME_STEP = 60 * 60; //1 minutes per frame
+    private static final float TIME_STEP = 60 * 30; //1/2 minutes per frame
     private static final int TRAIL_MAX_POINTS = 100000;
 
     private UIInitializer uiInitializer;
@@ -158,7 +158,14 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
             engine.update(TIME_STEP);
 
         for (CelestialBody b : bodies) {
-            b.addTrailPoint(b.getPosition(), TRAIL_MAX_POINTS);
+            if(!b.isMoon)
+                b.addTrailPoint(b.getPosition(), TRAIL_MAX_POINTS);
+            else if(uiInitializer.isDisplayingMoonTrails()) {
+                b.addTrailPoint(b.getPosition(), TRAIL_MAX_POINTS);
+            }
+            else {
+                b.getTrail().clear();
+            }
         }
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
