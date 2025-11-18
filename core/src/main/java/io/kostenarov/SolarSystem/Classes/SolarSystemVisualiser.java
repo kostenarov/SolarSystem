@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import static com.badlogic.gdx.math.MathUtils.random;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.color;
 
 
 public class SolarSystemVisualiser extends ApplicationAdapter implements UIInitializer.BodySelectionListener {
@@ -53,7 +54,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
 
         renderer = new Renderer();
         starRenderer = new ShapeRenderer();
-        ringRenderer = new ShapeRenderer(); // initialize ring renderer
+        ringRenderer = new ShapeRenderer();
         generateStars(AU);
 
         uiInitializer = new UIInitializer(bodies, this);
@@ -68,7 +69,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         }
 
         for(int i = 0; i < ringCount; i++) {
-            ringColors[i] = getRandomStarColor();
+            ringColors[i] = getRandomRingColor(i);
         }
 
     }
@@ -118,16 +119,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-            // Reset camera to Sun's position but do not enable follow
-            if (resetPoint != null) {
-                Vector2 p = resetPoint.getPosition();
-                camera.position.set(p.x, p.y, 0);
-            } else {
-                camera.position.set(0, 0, 0);
-            }
-            followTarget = null;
-            camera.zoom = 5 * AU / Gdx.graphics.getWidth();
-            camera.update();
+            resetToSun();
         }
     }
 
@@ -172,13 +164,15 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         starRenderer.setProjectionMatrix(camera.combined);
-        starRenderer.begin(ShapeRenderer.ShapeType.Point);
-        starRenderer.setColor(Color.WHITE);
-        for (Vector2 s : stars) {
-            starRenderer.point(s.x, s.y, 0);
-        }
-        starRenderer.end();
 
+        if(uiInitializer.isDisplayingStars()) {
+            starRenderer.begin(ShapeRenderer.ShapeType.Point);
+            starRenderer.setColor(Color.WHITE);
+            for (Vector2 s : stars) {
+                starRenderer.point(s.x, s.y, 0);
+            }
+            starRenderer.end();
+        }
         renderer.render(camera, bodies, VISUAL_RADIUS_SCALE);
 
         ringRenderer.setProjectionMatrix(camera.combined);
@@ -211,16 +205,17 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         uiInitializer.getStage().draw();
     }
 
-    private Color getRandomStarColor() {
+    private Color getRandomRingColor(int ringNumber) {
         float chance = MathUtils.random();
+        Color color = new Color();
         if (chance < 0.25f) {
-            return Color.WHITE;
+            return new Color(1f, 1f, 0.8f, (float) ringNumber /ringCount); // Soft yellowish
         } else if (chance < 0.50f) {
-            return Color.LIGHT_GRAY;
+            return new Color(0.8f, 0.9f, 1f, (float) ringNumber /ringCount); // Soft bluish
         } else if (chance < 0.75f) {
-            return Color.BROWN;
+            return new Color(0.9f, 0.9f, 1f, (float) ringNumber /ringCount);
         } else {
-            return Color.ORANGE;
+            return new Color(1f, 1f, 1f, (float) ringNumber /ringCount);
         }
     }
 
