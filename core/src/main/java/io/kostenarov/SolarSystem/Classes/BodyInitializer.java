@@ -3,6 +3,13 @@ package io.kostenarov.SolarSystem.Classes;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import com.badlogic.gdx.utils.Json;
 
 public class BodyInitializer {
 
@@ -82,6 +89,94 @@ public class BodyInitializer {
         );
 
         bodies.add(moon);
+    }
+
+    public Array<CelestialBody> initializeFromJson(String jsonFilePath) throws IOException {
+        String jsonText = Files.readString(Paths.get(jsonFilePath), StandardCharsets.UTF_8);
+        Json json = new Json();
+        BodyConfig[] configs = json.fromJson(BodyConfig[].class, jsonText);
+
+        Array<CelestialBody> bodies = new Array<>();
+        List<BodyConfig> moonConfigs = new ArrayList<>();
+
+        for (BodyConfig c : configs) {
+            if (c.orbitParent != null && !c.orbitParent.isEmpty()) {
+                moonConfigs.add(c);
+                continue;
+            }
+
+            Vector2 pos = c.position != null ? new Vector2(c.position[0] * AU, c.position[1] * AU) : new Vector2(0, 0);
+            Vector2 vel = c.velocity != null ? new Vector2(c.velocity[0], c.velocity[1]) : new Vector2(0, 0);
+            Color col = toColor(c.color);
+
+            CelestialBody body = new CelestialBody(
+                c.name,
+                (float) c.mass,
+                (float) c.radius,
+                col,
+                pos,
+                vel,
+                c.hasRings,
+                c.isMoon
+            );
+
+            bodies.add(body);
+        }
+
+        for (BodyConfig c : moonConfigs) {
+            CelestialBody parent = null;
+            for (CelestialBody b : bodies) {
+                if (b.getName().equals(c.orbitParent)) {
+                    parent = b;
+                    break;
+                }
+            }
+            if (parent == null) continue;
+
+            double orbitR = c.orbitRadius;
+            float angleRad = (float) Math.toRadians(c.orbitAngleDegrees);
+
+            float px = parent.getPosition().x + (float) (orbitR * Math.cos(angleRad));
+            float py = parent.getPosition().y + (float) (orbitR * Math.sin(angleRad));
+
+            double v = Math.sqrt(G * (double) parent.getMass() / orbitR);
+            float vxRel = (float) (-v * Math.sin(angleRad));
+            float vyRel = (float) (v * Math.cos(angleRad));
+
+            Vector2 parentVel = parent.getVelocity();
+            float vx = parentVel.x + vxRel;
+            float vy = parentVel.y + vyRel;
+
+            Color col = toColor(c.color);
+
+            CelestialBody moon = new CelestialBody(
+                c.name,
+                (float) c.mass,
+                (float) c.radius,
+                col,
+                new Vector2(px, py),
+                new Vector2(vx, vy),
+                c.hasRings,
+                true
+            );
+
+            bodies.add(moon);
+        }
+
+        for (CelestialBody b : bodies) {
+            b.addTrailPoint(b.getPosition(), TRAIL_MAX_POINTS);
+        }
+
+        return bodies;
+    }
+
+    private static Color toColor(float[] arr) {
+        if (arr == null) return Color.WHITE;
+        float r = arr.length > 0 ? arr[0] : 1f;
+        float g = arr.length > 1 ? arr[1] : 1f;
+        float b = arr.length > 2 ? arr[2] : 1f;
+        float a = arr.length > 3 ? arr[3] : 1f;
+        return new Color(r, g, b, a);
     }
 
     public float getAU() {

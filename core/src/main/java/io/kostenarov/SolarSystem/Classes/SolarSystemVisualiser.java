@@ -11,6 +11,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+import java.io.IOException;
+
 import static com.badlogic.gdx.math.MathUtils.random;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.color;
 
@@ -44,7 +46,11 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     @Override
     public void create() {
         bodyInitializer = new BodyInitializer();
-        bodies = bodyInitializer.initializeBodies();
+        try {
+            bodies = bodyInitializer.initializeFromJson("saves/exampleSystem.json");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         AU = bodyInitializer.getAU(); // Get AU constant
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
