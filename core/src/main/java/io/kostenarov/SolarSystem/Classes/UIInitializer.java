@@ -151,6 +151,13 @@ public class UIInitializer {
         checkBoxStyle.fontColor = Color.WHITE;
         skin.add("default", checkBoxStyle);
 
+        Slider.SliderStyle sliderStyle = new Slider.SliderStyle();
+        sliderStyle.background = skin.newDrawable("white", new Color(0.15f, 0.15f, 0.15f, 1f));
+        sliderStyle.knob = skin.newDrawable("white", Color.LIGHT_GRAY);
+        sliderStyle.knobOver = skin.newDrawable("white", Color.WHITE);
+        sliderStyle.knobDown = skin.newDrawable("white", Color.DARK_GRAY);
+        skin.add("default-horizontal", sliderStyle);
+
         return skin;
     }
 
