@@ -30,7 +30,7 @@ public class FirstScreen implements Screen {
     public void resize(int width, int height) {
         // If the window is minimized on a desktop (LWJGL3) platform, width and height are 0, which causes problems.
         // In that case, we don't resize anything, and wait for the window to be a normal size before updating.
-        if(width <= 0 || height <= 0) return;
+        if(width <= 1000 || height <= 700) return;
         if(width <= 1000 || height <= 700) return;
         stage.getViewport().update(width, height, true);
     }
