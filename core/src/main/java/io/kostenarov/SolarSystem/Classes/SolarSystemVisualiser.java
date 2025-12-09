@@ -41,17 +41,15 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     private UIInitializer uiInitializer;
     private BodyInitializer bodyInitializer;
     private StartScreen startScreen;
+    private String currentSimulationPath = "saves/exampleSystem.json";
 
     @Override
     public void create() {
         bodyInitializer = new BodyInitializer();
-
-        // Create an empty bodies list and pass it to UIInitializer so references remain valid
         bodies = new Array<>();
         uiInitializer = new UIInitializer(bodies, this);
         Gdx.input.setInputProcessor(uiInitializer.getStage());
 
-        // Basic camera so UI can render; real zoom/position set after loading system
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(0, 0, 0);
         camera.update();
@@ -60,32 +58,40 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         starRenderer = new ShapeRenderer();
         ringRenderer = new ShapeRenderer();
 
-        // Setup a simple start screen that defers loading/initialization
         startScreen = new StartScreen(uiInitializer.getStage(),
-            () -> startSimulation("saves/exampleSystem.json"), // Start uses example by default
-            () -> startSimulation("saves/exampleSystem.json"),
+            () -> startSimulation(currentSimulationPath),
+            null,
+            selected -> {
+                if (selected == null || selected.isEmpty()) return;
+                String path = selected;
+                if (!path.contains("/") && !path.contains("\\") && !path.startsWith("saves")) {
+                    path = "saves/" + path;
+                }
+                startSimulation(path);
+            },
             () -> Gdx.app.exit()
         );
+        if (startScreen != null) startScreen.selectBuild(currentSimulationPath);
 
-        // prepare ring colors array
         for(int i = 0; i < ringCount; i++) {
             ringColors[i] = getRandomRingColor(i);
         }
     }
 
     private void startSimulation(String jsonPath) {
+        currentSimulationPath = jsonPath;
+        if (startScreen != null) startScreen.selectBuild(currentSimulationPath);
+
         try {
             Array<CelestialBody> loaded = bodyInitializer.initializeFromJson(jsonPath);
-            // preserve the original `bodies` reference so UIInitializer sees updates
             bodies.clear();
             for (CelestialBody b : loaded) bodies.add(b);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        AU = bodyInitializer.getAU(); // Get AU constant
+        AU = bodyInitializer.getAU();
 
-        // camera zoom based on AU
         camera.zoom = 5 * AU / Gdx.graphics.getWidth();
         camera.update();
 
