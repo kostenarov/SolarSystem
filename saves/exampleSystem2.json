@@ -1,0 +1,369 @@
+[
+  {
+    "name": "Sun",
+    "mass": 1.989e30,
+    "radius": 100.9634e11,
+    "color": [1.0, 0.95, 0.0, 1.0],
+    "position": [0.0, 0.0],
+    "velocity": [0.0, 700.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Mercury",
+    "mass": 3.3011e23,
+    "radius": 2.4397e6,
+    "color": [0.7, 0.4, 0.2, 1.0],
+    "position": [0.0, 0.387],
+    "velocity": [-47360.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Venus",
+    "mass": 4.8675e24,
+    "radius": 6.0518e6,
+    "color": [0.5, 1.0, 0.0, 1.0],
+    "position": [-0.723, 0.0],
+    "velocity": [0.0, -35020.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Earth",
+    "mass": 5.972e24,
+    "radius": 6.371e6,
+    "color": [0.2, 0.4, 1.0, 1.0],
+    "position": [1, 0.0],
+    "velocity": [0.0, 29780.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Mars",
+    "mass": 6.39e23,
+    "radius": 3.389e6,
+    "color": [1.0, 0.5, 0.2, 1.0],
+    "position": [0.0, -1.524],
+    "velocity": [24070.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Jupiter-Like",
+    "mass": 1.898e28,
+    "radius": 2.991e7,
+    "color": [0.85, 0.7, 0.5, 1.0],
+    "position": [-3.5, 0.0],
+    "velocity": [0.0, -18000.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Saturn-Like",
+    "mass": 5.683e26,
+    "radius": 6.003e6,
+    "color": [0.9, 0.85, 0.6, 1.0],
+    "position": [9.5, 0.0],
+    "velocity": [0.0, 9690.0],
+    "hasRings": true,
+    "isMoon": false
+  },
+  {
+    "name": "Uranus-Like",
+    "mass": 8.681e25,
+    "radius": 2.5362e7,
+    "color": [0.5, 0.7, 0.7, 1.0],
+    "position": [0.0, -19.8],
+    "velocity": [6800.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Neptune-Like",
+    "mass": 1.024e26,
+    "radius": 2.4622e7,
+    "color": [0.2, 0.8, 1.0, 1.0],
+    "position": [-30.0, 0.0],
+    "velocity": [0.0, -5430.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+
+  {
+    "name": "Moon",
+    "mass": 7.342e22,
+    "radius": 1.737e6,
+    "color": [0.95, 0.95, 1.0, 1.0],
+    "orbitParent": "Earth",
+    "orbitRadius": 3.844e8,
+    "orbitAngleDegrees": 30.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Phobos-Moon",
+    "mass": 1.0659e16,
+    "radius": 1.1e4,
+    "color": [0.8, 0.8, 0.8, 1.0],
+    "orbitParent": "Mars",
+    "orbitRadius": 9.378e6,
+    "orbitAngleDegrees": -45.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Deimos-Moon",
+    "mass": 1.4762e15,
+    "radius": 6.2e3,
+    "color": [0.7, 0.7, 0.7, 1.0],
+    "orbitParent": "Mars",
+    "orbitRadius": 2.346e7,
+    "orbitAngleDegrees": 75.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+
+  {
+    "name": "Io-Like",
+    "mass": 8.9319e22,
+    "radius": 1.8216e6,
+    "color": [1.0, 0.6, 0.2, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 4.217e8,
+    "orbitAngleDegrees": 60.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Europa-Like",
+    "mass": 4.7998e22,
+    "radius": 1.5608e6,
+    "color": [0.9, 0.9, 0.95, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 6.709e8,
+    "orbitAngleDegrees": -90.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Ganymede-Like",
+    "mass": 1.4819e23,
+    "radius": 2.6341e6,
+    "color": [0.6, 0.6, 0.6, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.0704e9,
+    "orbitAngleDegrees": 120.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Titan-Moon",
+    "mass": 1.3452e23,
+    "radius": 2.575e6,
+    "color": [0.5, 1.0, 0.0, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.2219e9,
+    "orbitAngleDegrees": 0.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Callisto-Like",
+    "mass": 1.0759e23,
+    "radius": 2.4103e6,
+    "color": [0.0, 0.0, 0.0, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.8827e9,
+    "orbitAngleDegrees": -150.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Dino-Moon",
+    "mass": 5.0e20,
+    "radius": 5.0e5,
+    "color": [0.98, 0.5, 0.45, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 2.5e9,
+    "orbitAngleDegrees": 45.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Rexo-Moon",
+    "mass": 8.0e20,
+    "radius": 7.0e5,
+    "color": [1.0, 1.0, 1.0, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 3.0e9,
+    "orbitAngleDegrees": -30.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Zork-Moon",
+    "mass": 1.2e21,
+    "radius": 9.0e5,
+    "color": [0.5, 0.0, 0.13, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 3.5e9,
+    "orbitAngleDegrees": 90.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Blip-Moon",
+    "mass": 6.0e20,
+    "radius": 6.0e5,
+    "color": [0.44, 0.5, 0.56, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 4.0e9,
+    "orbitAngleDegrees": -120.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+{
+    "name": "Metis",
+    "mass": 2.0e16,
+    "radius": 2.15e4,
+    "color": [0.7, 0.7, 0.7, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.279e8,
+    "orbitAngleDegrees": 10.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Adrastea",
+    "mass": 2.0e15,
+    "radius": 1.6e4,
+    "color": [0.75, 0.7, 0.65, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.290e8,
+    "orbitAngleDegrees": 40.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Amalthea",
+    "mass": 2.08e18,
+    "radius": 8.25e4,
+    "color": [0.85, 0.7, 0.5, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.814e8,
+    "orbitAngleDegrees": -25.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Thebe",
+    "mass": 7.77e17,
+    "radius": 5.6e4,
+    "color": [0.8, 0.75, 0.7, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 2.222e8,
+    "orbitAngleDegrees": 95.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Himalia",
+    "mass": 9.5e18,
+    "radius": 8.5e4,
+    "color": [0.6, 0.55, 0.5, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.147e10,
+    "orbitAngleDegrees": -60.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Elara",
+    "mass": 8.0e17,
+    "radius": 4.0e4,
+    "color": [0.65, 0.6, 0.55, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.174e10,
+    "orbitAngleDegrees": 135.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Lysithea",
+    "mass": 6.3e17,
+    "radius": 2.7e4,
+    "color": [0.7, 0.6, 0.5, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.148e10,
+    "orbitAngleDegrees": 5.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Leda",
+    "mass": 6.3e16,
+    "radius": 1.0e4,
+    "color": [0.7, 0.7, 0.7, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.076e10,
+    "orbitAngleDegrees": -10.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Carme",
+    "mass": 1.3e17,
+    "radius": 2.0e4,
+    "color": [0.45, 0.35, 0.3, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 2.216e10,
+    "orbitAngleDegrees": 180.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Ananke",
+    "mass": 8.2e16,
+    "radius": 1.5e4,
+    "color": [0.5, 0.45, 0.4, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 2.486e10,
+    "orbitAngleDegrees": -120.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Pasiphae",
+    "mass": 3.0e17,
+    "radius": 3.0e4,
+    "color": [0.55, 0.5, 0.45, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 2.294e10,
+    "orbitAngleDegrees": 70.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Sinope",
+    "mass": 7.0e16,
+    "radius": 1.95e4,
+    "color": [0.6, 0.55, 0.5, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 2.245e10,
+    "orbitAngleDegrees": 250.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Themisto",
+    "mass": 7.5e16,
+    "radius": 1.8e4,
+    "color": [0.65, 0.62, 0.6, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 7.391e9,
+    "orbitAngleDegrees": 210.0,
+    "hasRings": false,
+    "isMoon": true
+  }
+]

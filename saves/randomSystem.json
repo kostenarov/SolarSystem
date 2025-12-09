@@ -1,0 +1,148 @@
+[
+  {
+    "name": "Sun",
+    "mass": 1.20e30,
+    "radius": 7.00e11,
+    "color": [1.0, 0.95, 0.7, 1.0],
+    "orbitRadius": 0,
+    "orbitAngleDegrees": 0.0,
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Twin-Sun-B",
+    "mass": 8.00e27,
+    "radius": 6.00e11,
+    "color": [1.0, 0.85, 0.75, 1.0],
+    "orbitRadius": 1.50e10,
+    "orbitAngleDegrees": 180.0,
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Aurelia",
+    "mass": 5.97e24,
+    "radius": 6.37e6,
+    "color": [0.2, 0.4, 0.85, 1.0],
+    "orbitRadius": 1.10e11,
+    "orbitAngleDegrees": 23.5,
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Vesper-1",
+    "mass": 4.0e23,
+    "radius": 3.4e6,
+    "color": [0.9, 0.5, 0.2, 1.0],
+    "orbitRadius": 6.0e10,
+    "orbitAngleDegrees": -47.0,
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Helium-Giant-A",
+    "mass": 1.90e27,
+    "radius": 6.0e7,
+    "color": [0.9, 0.75, 0.6, 1.0],
+    "orbitRadius": 7.8e11,
+    "orbitAngleDegrees": 120.0,
+    "hasRings": true,
+    "isMoon": false
+  },
+  {
+    "name": "Corvus",
+    "mass": 3.3e23,
+    "radius": 2.9e6,
+    "color": [0.6, 0.6, 0.65, 1.0],
+    "orbitRadius": 9.0e10,
+    "orbitAngleDegrees": 5.0,
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Sable",
+    "mass": 8.6e24,
+    "radius": 5.9e6,
+    "color": [0.15, 0.35, 0.75, 1.0],
+    "orbitRadius": 1.5e11,
+    "orbitAngleDegrees": -12.0,
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Gasus-B",
+    "mass": 5.5e26,
+    "radius": 5.0e7,
+    "color": [0.95, 0.8, 0.6, 1.0],
+    "orbitRadius": 5.2e11,
+    "orbitAngleDegrees": 210.0,
+    "hasRings": true,
+    "isMoon": false
+  },
+  {
+    "name": "Aurelia-I",
+    "mass": 7.35e22,
+    "radius": 1.7e6,
+    "color": [0.7, 0.7, 0.72, 1.0],
+    "orbitParent": "Aurelia",
+    "orbitRadius": 4.1e8,
+    "orbitAngleDegrees": 10.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Aurelia-II",
+    "mass": 1.0e22,
+    "radius": 9.5e5,
+    "color": [0.6, 0.58, 0.6, 1.0],
+    "orbitParent": "Aurelia",
+    "orbitRadius": 7.0e8,
+    "orbitAngleDegrees": 140.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Helium-A-1",
+    "mass": 1.2e23,
+    "radius": 2.4e6,
+    "color": [0.8, 0.7, 0.6, 1.0],
+    "orbitParent": "Helium-Giant-A",
+    "orbitRadius": 1.2e9,
+    "orbitAngleDegrees": 60.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Helium-A-2",
+    "mass": 6.0e22,
+    "radius": 1.6e6,
+    "color": [0.85, 0.8, 0.75, 1.0],
+    "orbitParent": "Helium-Giant-A",
+    "orbitRadius": 2.0e9,
+    "orbitAngleDegrees": -30.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Gasus-B-I",
+    "mass": 9.0e22,
+    "radius": 2.1e6,
+    "color": [0.9, 0.85, 0.8, 1.0],
+    "orbitParent": "Gasus-B",
+    "orbitRadius": 1.8e9,
+    "orbitAngleDegrees": 300.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Circumbinary-Drift",
+    "mass": 2.2e25,
+    "radius": 3.4e6,
+    "color": [0.4, 0.6, 0.9, 1.0],
+    "orbitParent": "Sun",
+    "orbitRadius": 1.2e12,
+    "orbitAngleDegrees": 75.0,
+    "hasRings": false,
+    "isMoon": false
+  }
+]

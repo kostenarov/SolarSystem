@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import org.w3c.dom.Text;
 
 public class UIInitializer {
 
@@ -31,8 +30,11 @@ public class UIInitializer {
     private Texture bottomMenuTexture;
     private Image bottomMenuImage; // new field
     private CheckBox displayMoonTrailsCheckbox;
+    private CheckBox isDisplayingStarsCheckbox;
+
     private boolean isPaused = false;
     private boolean isDisplayingMoonTrails = true;
+    private boolean isDisplayingStars = true;
 
     public interface BodySelectionListener {
         void onBodySelected(CelestialBody body);
@@ -102,11 +104,11 @@ public class UIInitializer {
         pauseTexture = createPauseButtonTexture();
         bottomMenuTexture = initBottomMenu();
         createDisplayMoonTrailsCheckbox();
+        createDisplayStarsCheckbox();
         initializeUi();
         updateBodyList(bodies);
     }
 
-    // java
     private Skin createBasicSkin() {
         Skin skin = new Skin();
 
@@ -142,7 +144,6 @@ public class UIInitializer {
         labelStyle.fontColor = Color.WHITE;
         skin.add("default", labelStyle);
 
-        // Add CheckBox style so new CheckBox(..., skin) can find "default"
         CheckBox.CheckBoxStyle checkBoxStyle = new CheckBox.CheckBoxStyle();
         checkBoxStyle.checkboxOn = skin.newDrawable("white", Color.WHITE); // visible when checked
         checkBoxStyle.checkboxOff = skin.newDrawable("white", Color.DARK_GRAY); // visible when unchecked
@@ -150,9 +151,15 @@ public class UIInitializer {
         checkBoxStyle.fontColor = Color.WHITE;
         skin.add("default", checkBoxStyle);
 
+        Slider.SliderStyle sliderStyle = new Slider.SliderStyle();
+        sliderStyle.background = skin.newDrawable("white", new Color(0.15f, 0.15f, 0.15f, 1f));
+        sliderStyle.knob = skin.newDrawable("white", Color.LIGHT_GRAY);
+        sliderStyle.knobOver = skin.newDrawable("white", Color.WHITE);
+        sliderStyle.knobDown = skin.newDrawable("white", Color.DARK_GRAY);
+        skin.add("default-horizontal", sliderStyle);
+
         return skin;
     }
-
 
     private Texture createPauseButtonTexture() {
         Pixmap pixmap = new Pixmap(20, 20, Pixmap.Format.RGBA8888);
@@ -186,8 +193,20 @@ public class UIInitializer {
         stage.addActor(displayMoonTrailsCheckbox);
     }
 
+    private void createDisplayStarsCheckbox() {
+        isDisplayingStarsCheckbox = new CheckBox(" Display Stars", skin);
+        isDisplayingStarsCheckbox.setPosition(10, Gdx.graphics.getHeight() / 6 + 50);
+        isDisplayingStarsCheckbox.setChecked(true);
+        isDisplayingStarsCheckbox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                isDisplayingStars = isDisplayingStarsCheckbox.isChecked();
+            }
+        });
+        stage.addActor(isDisplayingStarsCheckbox);
+    }
+
     private void initializeUi() {
-        // create bottom menu image and make it stretch across the screen
         bottomMenuImage = new Image(bottomMenuTexture);
         bottomMenuImage.setPosition(0, 0);
         bottomMenuImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() / 6.5f);
@@ -201,10 +220,9 @@ public class UIInitializer {
                 dropdownContainer.setVisible(!dropdownContainer.isVisible());
             }
         });
-        // add toggle after bottom menu so it appears on top
         stage.addActor(toggleButton);
 
-        stage.addActor(new Image()); // placeholder to keep ordering similar if needed
+        stage.addActor(new Image());
 
         pauseButton();
 
@@ -267,6 +285,9 @@ public class UIInitializer {
             bottomMenuImage.setSize(width, (float) height / 6.5f);
         }
 
+        isDisplayingStarsCheckbox.setPosition(10, height / 6 + 50);
+        displayMoonTrailsCheckbox.setPosition(10, height / 6 + 20);
+
         pauseButton.setPosition((width - pauseButton.getWidth()) / 2, (float) height / 7 - pauseButton.getHeight() - 10);
         //pauseButton.setSize(pauseButton.getWidth() - pauseButton.getWidth() / Gdx.graphics.getWidth(),
         //pauseButton.getHeight() - pauseButton.getHeight() / Gdx.graphics.getHeight());
@@ -278,6 +299,12 @@ public class UIInitializer {
         pauseButton.setPosition(Gdx.graphics.getWidth() - pauseButton.getWidth(), Gdx.graphics.getHeight() - pauseButton.getHeight() - 10);
         pauseButton.getStyle().imageUp = new Image(pauseTexture).getDrawable();
         pauseButton.getStyle().imageDown = new Image(pauseTexture).getDrawable();
+        pauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                isPaused = !isPaused;
+            }
+        });
         stage.addActor(pauseButton);
 
     }
@@ -291,4 +318,5 @@ public class UIInitializer {
 
     public boolean isPaused() { return isPaused; }
     public boolean isDisplayingMoonTrails() { return isDisplayingMoonTrails; }
+    public boolean isDisplayingStars() { return isDisplayingStars; }
 }

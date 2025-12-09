@@ -178,49 +178,5 @@
     "orbitAngleDegrees": -150.0,
     "hasRings": false,
     "isMoon": true
-  },
-  {
-    "name": "Dino-Moon",
-    "mass": 5.0e20,
-    "radius": 5.0e5,
-    "color": [0.98, 0.5, 0.45, 1.0],
-    "orbitParent": "Jupiter-Like",
-    "orbitRadius": 2.5e9,
-    "orbitAngleDegrees": 45.0,
-    "hasRings": false,
-    "isMoon": true
-  },
-  {
-    "name": "Rexo-Moon",
-    "mass": 8.0e20,
-    "radius": 7.0e5,
-    "color": [1.0, 1.0, 1.0, 1.0],
-    "orbitParent": "Jupiter-Like",
-    "orbitRadius": 3.0e9,
-    "orbitAngleDegrees": -30.0,
-    "hasRings": false,
-    "isMoon": true
-  },
-  {
-    "name": "Zork-Moon",
-    "mass": 1.2e21,
-    "radius": 9.0e5,
-    "color": [0.5, 0.0, 0.13, 1.0],
-    "orbitParent": "Jupiter-Like",
-    "orbitRadius": 3.5e9,
-    "orbitAngleDegrees": 90.0,
-    "hasRings": false,
-    "isMoon": true
-  },
-  {
-    "name": "Blip-Moon",
-    "mass": 6.0e20,
-    "radius": 6.0e5,
-    "color": [0.44, 0.5, 0.56, 1.0],
-    "orbitParent": "Jupiter-Like",
-    "orbitRadius": 4.0e9,
-    "orbitAngleDegrees": -120.0,
-    "hasRings": false,
-    "isMoon": true
   }
 ]

@@ -45,11 +45,5 @@ public class PhysicsEngine {
             body.position.mulAdd(body.velocity, deltaTime);
         }
     }
-
-    //Runge kutta
-    //adams bashforth
-    //ppn method
-    //3d vector
-    //accurate poses - jpl horizons
 }
 
