@@ -4,7 +4,7 @@ A visually stunning, real-time n-body physics simulation of celestial systems. C
 
 ## Features
 
-✨ **Core Capabilities**
+**Core Capabilities**
 - **Accurate N-Body Physics**: Implements Newton's law of universal gravitation for realistic orbital mechanics
 - **Real-Time Visualization**: Watch celestial bodies orbit and interact in real-time with smooth 60 FPS rendering
 - **Customizable Systems**: Load pre-made planetary systems or create your own via JSON configuration files
@@ -12,7 +12,7 @@ A visually stunning, real-time n-body physics simulation of celestial systems. C
 - **Orbital Trails**: Visualize the paths of planets and moons as they orbit
 - **Planetary Rings**: Some celestial bodies can be equipped with visually stunning ring systems
 
-🎮 **User Interface**
+**User Interface**
 - **Intuitive Start Screen**: Select from multiple pre-configured systems or start custom simulations
 - **Live Body Information**: Click on bodies in the UI to view their properties (name, mass, radius, position, velocity)
 - **Simulation Controls**: Pause/resume simulation, toggle visual elements (stars, trails, rings)
@@ -270,7 +270,3 @@ Create `saves/binaryStars.json`:
   }
 ]
 ```
-
-Then load it from the start screen!
-
-Enjoy exploring the cosmos! 🌍🪐⭐
