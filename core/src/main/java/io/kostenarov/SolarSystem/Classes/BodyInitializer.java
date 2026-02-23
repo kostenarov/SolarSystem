@@ -92,7 +92,8 @@ public class BodyInitializer {
     }
 
     public Array<CelestialBody> initializeFromJson(String jsonFilePath) throws IOException {
-        String jsonText = Files.readString(Paths.get(jsonFilePath), StandardCharsets.UTF_8);
+        byte[] bytes = Files.readAllBytes(Paths.get(jsonFilePath));
+        String jsonText = new String(bytes, StandardCharsets.UTF_8);
         Json json = new Json();
         BodyConfig[] configs = json.fromJson(BodyConfig[].class, jsonText);
 
@@ -169,6 +170,7 @@ public class BodyInitializer {
 
         return bodies;
     }
+
 
     private static Color toColor(float[] arr) {
         if (arr == null) return Color.WHITE;

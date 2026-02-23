@@ -36,7 +36,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     private static final int TRAIL_MAX_POINTS = 100000;
     private static final float STAR_FIELD_RADIUS_MULTIPLIER = 10000000;
     private static final float VISUAL_RADIUS_SCALE = 400f;
-    private static final float TIME_STEP = 60 * 30; //1/2 minutes per frame
+    private static final float TIME_STEP = 60 * 120; //2 minutes per frame
 
     private UIInitializer uiInitializer;
     private BodyInitializer bodyInitializer;

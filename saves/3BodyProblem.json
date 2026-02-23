@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Sun",
+    "mass": 1.989e30,
+    "radius": 100.9634e14,
+    "color": [1.0, 0.95, 0.0, 1.0],
+    "position": [5000.0, 0.0],
+    "velocity": [0.0, 30000.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Sun1",
+    "mass": 1.989e30,
+    "radius": 100.9634e14,
+    "color": [1.0, 0.95, 0.0, 1.0],
+    "position": [-200.0, 500.0],
+    "velocity": [-29000.0, -10000.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Sun2",
+    "mass": 1.989e30,
+    "radius": 100.9634e14,
+    "color": [1.0, 0.95, 0.0, 1.0],
+    "position": [-200, -500.0],
+    "velocity": [29000.0, -10000.0],
+    "hasRings": false,
+    "isMoon": false
+  }
+]

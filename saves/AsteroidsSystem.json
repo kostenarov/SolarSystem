@@ -1,0 +1,505 @@
+[
+  {
+    "name": "Sun",
+    "mass": 1.989e30,
+    "radius": 100.9634e11,
+    "color": [1.0, 0.95, 0.0, 1.0],
+    "position": [0.0, 0.0],
+    "velocity": [0.0, 700.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Mercury",
+    "mass": 3.3011e23,
+    "radius": 2.4397e6,
+    "color": [0.7, 0.4, 0.2, 1.0],
+    "position": [0.0, 0.387],
+    "velocity": [-47360.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Venus",
+    "mass": 4.8675e24,
+    "radius": 6.0518e6,
+    "color": [0.5, 1.0, 0.0, 1.0],
+    "position": [-0.723, 0.0],
+    "velocity": [0.0, -35020.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Earth",
+    "mass": 5.972e24,
+    "radius": 6.371e6,
+    "color": [0.2, 0.4, 1.0, 1.0],
+    "position": [1, 0.0],
+    "velocity": [0.0, 29780.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Mars",
+    "mass": 6.39e23,
+    "radius": 3.389e6,
+    "color": [1.0, 0.5, 0.2, 1.0],
+    "position": [0.0, -1.524],
+    "velocity": [24070.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Jupiter-Like",
+    "mass": 1.898e28,
+    "radius": 2.991e7,
+    "color": [0.85, 0.7, 0.5, 1.0],
+    "position": [-3.5, 0.0],
+    "velocity": [0.0, -18000.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Saturn-Like",
+    "mass": 5.683e26,
+    "radius": 6.003e6,
+    "color": [0.9, 0.85, 0.6, 1.0],
+    "position": [9.5, 0.0],
+    "velocity": [0.0, 9690.0],
+    "hasRings": true,
+    "isMoon": false
+  },
+  {
+    "name": "Uranus-Like",
+    "mass": 8.681e25,
+    "radius": 2.5362e7,
+    "color": [0.5, 0.7, 0.7, 1.0],
+    "position": [0.0, -19.8],
+    "velocity": [6800.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Neptune-Like",
+    "mass": 1.024e26,
+    "radius": 2.4622e7,
+    "color": [0.2, 0.8, 1.0, 1.0],
+    "position": [-30.0, 0.0],
+    "velocity": [0.0, -5430.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+
+  {
+    "name": "Moon",
+    "mass": 7.342e22,
+    "radius": 1.737e6,
+    "color": [0.95, 0.95, 1.0, 1.0],
+    "orbitParent": "Earth",
+    "orbitRadius": 3.844e8,
+    "orbitAngleDegrees": 30.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Phobos-Moon",
+    "mass": 1.0659e16,
+    "radius": 1.1e4,
+    "color": [0.8, 0.8, 0.8, 1.0],
+    "orbitParent": "Mars",
+    "orbitRadius": 9.378e6,
+    "orbitAngleDegrees": -45.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Deimos-Moon",
+    "mass": 1.4762e15,
+    "radius": 6.2e3,
+    "color": [0.7, 0.7, 0.7, 1.0],
+    "orbitParent": "Mars",
+    "orbitRadius": 2.346e7,
+    "orbitAngleDegrees": 75.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+
+  {
+    "name": "Io-Like",
+    "mass": 8.9319e22,
+    "radius": 1.8216e6,
+    "color": [1.0, 0.6, 0.2, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 4.217e8,
+    "orbitAngleDegrees": 60.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Europa-Like",
+    "mass": 4.7998e22,
+    "radius": 1.5608e6,
+    "color": [0.9, 0.9, 0.95, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 6.709e8,
+    "orbitAngleDegrees": -90.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Ganymede-Like",
+    "mass": 1.4819e23,
+    "radius": 2.6341e6,
+    "color": [0.6, 0.6, 0.6, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.0704e9,
+    "orbitAngleDegrees": 120.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Titan-Moon",
+    "mass": 1.3452e23,
+    "radius": 2.575e6,
+    "color": [0.5, 1.0, 0.0, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.2219e9,
+    "orbitAngleDegrees": 0.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Callisto-Like",
+    "mass": 1.0759e23,
+    "radius": 2.4103e6,
+    "color": [0.0, 0.0, 0.0, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 1.8827e9,
+    "orbitAngleDegrees": -150.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Dino-Moon",
+    "mass": 5.0e20,
+    "radius": 5.0e5,
+    "color": [0.98, 0.5, 0.45, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 2.5e9,
+    "orbitAngleDegrees": 45.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Rexo-Moon",
+    "mass": 8.0e20,
+    "radius": 7.0e5,
+    "color": [1.0, 1.0, 1.0, 1.0],
+    "orbitParent": "Jupiter-Like",
+    "orbitRadius": 3.0e9,
+    "orbitAngleDegrees": -30.0,
+    "hasRings": false,
+    "isMoon": true
+  },
+  {
+    "name": "Asteroid-001",
+    "mass": 1.2e15,
+    "radius": 4.5e3,
+    "color": [0.6, 0.6, 0.6, 1.0],
+    "position": [2.20, 0.10],
+    "velocity": [-17600.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-002",
+    "mass": 8.5e14,
+    "radius": 3.2e3,
+    "color": [0.65, 0.62, 0.6, 1.0],
+    "position": [2.25, -0.05],
+    "velocity": [0.0, 17750.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-003",
+    "mass": 4.3e14,
+    "radius": 2.1e3,
+    "color": [0.55, 0.55, 0.58, 1.0],
+    "position": [2.30, 0.22],
+    "velocity": [-17680.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-004",
+    "mass": 2.1e15,
+    "radius": 5.5e3,
+    "color": [0.7, 0.68, 0.65, 1.0],
+    "position": [2.34, -0.18],
+    "velocity": [0.0, 17590.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-005",
+    "mass": 6.0e14,
+    "radius": 3.8e3,
+    "color": [0.6, 0.6, 0.62, 1.0],
+    "position": [2.40, 0.05],
+    "velocity": [-17520.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-006",
+    "mass": 9.8e14,
+    "radius": 4.0e3,
+    "color": [0.58, 0.56, 0.55, 1.0],
+    "position": [2.45, -0.12],
+    "velocity": [0.0, 17410.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-007",
+    "mass": 1.6e15,
+    "radius": 6.0e3,
+    "color": [0.62, 0.6, 0.59, 1.0],
+    "position": [2.52, 0.20],
+    "velocity": [-17350.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-008",
+    "mass": 3.4e14,
+    "radius": 2.7e3,
+    "color": [0.5, 0.5, 0.5, 1.0],
+    "position": [2.60, -0.08],
+    "velocity": [0.0, 17180.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-009",
+    "mass": 7.2e14,
+    "radius": 3.0e3,
+    "color": [0.66, 0.64, 0.63, 1.0],
+    "position": [2.68, 0.13],
+    "velocity": [-17040.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-010",
+    "mass": 5.0e14,
+    "radius": 2.9e3,
+    "color": [0.6, 0.57, 0.55, 1.0],
+    "position": [2.75, -0.21],
+    "velocity": [0.0, 16900.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-011",
+    "mass": 1.1e15,
+    "radius": 4.8e3,
+    "color": [0.59, 0.59, 0.6, 1.0],
+    "position": [2.82, 0.07],
+    "velocity": [-16830.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-012",
+    "mass": 8.0e14,
+    "radius": 3.6e3,
+    "color": [0.61, 0.6, 0.6, 1.0],
+    "position": [2.90, -0.03],
+    "velocity": [0.0, 16750.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-013",
+    "mass": 2.2e14,
+    "radius": 1.5e3,
+    "color": [0.7, 0.7, 0.72, 1.0],
+    "position": [2.95, 0.18],
+    "velocity": [-16640.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-014",
+    "mass": 3.0e14,
+    "radius": 1.9e3,
+    "color": [0.68, 0.66, 0.64, 1.0],
+    "position": [3.00, -0.14],
+    "velocity": [0.0, 16580.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-015",
+    "mass": 1.9e15,
+    "radius": 7.2e3,
+    "color": [0.56, 0.55, 0.56, 1.0],
+    "position": [3.08, 0.05],
+    "velocity": [-16510.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-016",
+    "mass": 6.6e14,
+    "radius": 4.0e3,
+    "color": [0.6, 0.6, 0.6, 1.0],
+    "position": [3.15, -0.11],
+    "velocity": [0.0, 16400.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-017",
+    "mass": 4.9e14,
+    "radius": 3.3e3,
+    "color": [0.63, 0.62, 0.6, 1.0],
+    "position": [3.22, 0.22],
+    "velocity": [-16290.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-018",
+    "mass": 7.7e14,
+    "radius": 3.9e3,
+    "color": [0.58, 0.57, 0.57, 1.0],
+    "position": [3.30, -0.06],
+    "velocity": [0.0, 16180.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-019",
+    "mass": 2.5e15,
+    "radius": 8.5e3,
+    "color": [0.54, 0.53, 0.52, 1.0],
+    "position": [3.38, 0.12],
+    "velocity": [-16060.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-020",
+    "mass": 1.3e14,
+    "radius": 1.2e3,
+    "color": [0.7, 0.7, 0.7, 1.0],
+    "position": [3.45, -0.19],
+    "velocity": [0.0, 15940.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-021",
+    "mass": 9.0e14,
+    "radius": 4.2e3,
+    "color": [0.6, 0.6, 0.61, 1.0],
+    "position": [3.52, 0.08],
+    "velocity": [-15820.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-022",
+    "mass": 5.4e14,
+    "radius": 3.7e3,
+    "color": [0.62, 0.61, 0.6, 1.0],
+    "position": [3.60, -0.02],
+    "velocity": [0.0, 15710.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-023",
+    "mass": 1.7e15,
+    "radius": 6.5e3,
+    "color": [0.57, 0.56, 0.55, 1.0],
+    "position": [3.68, 0.17],
+    "velocity": [-15590.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-024",
+    "mass": 3.3e14,
+    "radius": 2.4e3,
+    "color": [0.65, 0.65, 0.66, 1.0],
+    "position": [3.75, -0.09],
+    "velocity": [0.0, 15470.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-025",
+    "mass": 4.6e14,
+    "radius": 2.8e3,
+    "color": [0.6, 0.59, 0.58, 1.0],
+    "position": [3.82, 0.03],
+    "velocity": [-15350.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-026",
+    "mass": 2.9e14,
+    "radius": 2.0e3,
+    "color": [0.68, 0.67, 0.66, 1.0],
+    "position": [3.90, -0.15],
+    "velocity": [0.0, 15230.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-027",
+    "mass": 1.0e15,
+    "radius": 4.6e3,
+    "color": [0.61, 0.6, 0.59, 1.0],
+    "position": [3.95, 0.11],
+    "velocity": [-15090.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-028",
+    "mass": 7.8e14,
+    "radius": 3.5e3,
+    "color": [0.63, 0.63, 0.64, 1.0],
+    "position": [4.02, -0.07],
+    "velocity": [0.0, 14960.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-029",
+    "mass": 1.4e15,
+    "radius": 5.0e3,
+    "color": [0.59, 0.58, 0.57, 1.0],
+    "position": [4.10, 0.19],
+    "velocity": [-14810.0, 0.0],
+    "hasRings": false,
+    "isMoon": false
+  },
+  {
+    "name": "Asteroid-030",
+    "mass": 2.0e15,
+    "radius": 9.0e3,
+    "color": [0.55, 0.54, 0.53, 1.0],
+    "position": [4.20, -0.13],
+    "velocity": [0.0, 14650.0],
+    "hasRings": false,
+    "isMoon": false
+  }
+]
+
