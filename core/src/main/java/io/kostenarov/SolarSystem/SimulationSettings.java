@@ -9,7 +9,7 @@ public class SimulationSettings {
     public static final double DEFAULT_TIME_SCALE = 30 * 60 * 60; // 30 simulated hours per real second
     public static final double DEFAULT_INTEGRATION_STEP = 5 * 60;
     public static final int DEFAULT_TRAIL_LENGTH = 100000;
-    public static final float DEFAULT_BODY_SIZE_SCALE = 1 / 400f;
+    public static final float DEFAULT_BODY_SIZE_SCALE = 1f; // true size
     public static final float DEFAULT_MIN_BODY_PIXELS = 3f;
 
     /** Simulated seconds per real second. */
@@ -18,7 +18,7 @@ public class SimulationSettings {
     public double integrationStep = DEFAULT_INTEGRATION_STEP;
     /** Trail points kept per body. */
     public int trailLength = DEFAULT_TRAIL_LENGTH;
-    /** Drawn radius = real radius * this. */
+    /** Drawn radius = real radius * this; 1 is true size. */
     public float bodySizeScale = DEFAULT_BODY_SIZE_SCALE;
     /** Bodies are never drawn smaller than this many pixels. */
     public float minBodyPixels = DEFAULT_MIN_BODY_PIXELS;
@@ -35,7 +35,7 @@ public class SimulationSettings {
         timeScale = prefs.getFloat("timeScale", (float) DEFAULT_TIME_SCALE);
         integrationStep = prefs.getFloat("integrationStep", (float) DEFAULT_INTEGRATION_STEP);
         trailLength = prefs.getInteger("trailLength", DEFAULT_TRAIL_LENGTH);
-        bodySizeScale = prefs.getFloat("bodySizeScale", DEFAULT_BODY_SIZE_SCALE);
+        bodySizeScale = prefs.getFloat("bodyScale", DEFAULT_BODY_SIZE_SCALE);
         minBodyPixels = prefs.getFloat("minBodyPixels", DEFAULT_MIN_BODY_PIXELS);
     }
 
@@ -43,7 +43,7 @@ public class SimulationSettings {
         prefs.putFloat("timeScale", (float) timeScale);
         prefs.putFloat("integrationStep", (float) integrationStep);
         prefs.putInteger("trailLength", trailLength);
-        prefs.putFloat("bodySizeScale", bodySizeScale);
+        prefs.putFloat("bodyScale", bodySizeScale);
         prefs.putFloat("minBodyPixels", minBodyPixels);
         prefs.flush();
     }

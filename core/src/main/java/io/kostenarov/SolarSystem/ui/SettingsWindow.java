@@ -52,10 +52,10 @@ public class SettingsWindow extends Window {
             void fromSlider(float t) { settings.trailLength = (int) Math.round(fromLog(t, 10, 100000)); }
             String format() { return settings.trailLength + " points"; }
         });
-        addRow(skin, "Body size", "Drawn radius as a multiple of the real radius", new SettingRow() {
-            float toSlider() { return toLog(settings.bodySizeScale, 1e-4, 1); }
-            void fromSlider(float t) { settings.bodySizeScale = (float) fromLog(t, 1e-4, 1); }
-            String format() { return "x " + String.format("%.4g", settings.bodySizeScale); }
+        addRow(skin, "Body size", "Drawn radius as a multiple of the real radius (x 1 is true size)", new SettingRow() {
+            float toSlider() { return toLog(settings.bodySizeScale, 1, 1000); }
+            void fromSlider(float t) { settings.bodySizeScale = (float) fromLog(t, 1, 1000); }
+            String format() { return "x " + String.format("%.3g", settings.bodySizeScale); }
         });
         addRow(skin, "Minimum body size", "Bodies are never drawn smaller than this", new SettingRow() {
             float toSlider() { return (settings.minBodyPixels - 1) / 19f; }

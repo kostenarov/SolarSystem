@@ -306,8 +306,9 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
 
             Vector2 pos = b.getPosition();
             float visualRadius = Renderer.drawRadius(b, settings, camera.zoom);
-            float inner = visualRadius * 1.5f;
-            float outer = visualRadius * 2.5f;
+            // Roughly where Saturn's main rings sit, in planet radii
+            float inner = visualRadius * 1.2f;
+            float outer = visualRadius * 2.3f;
 
             for (int s = 0; s < RING_COUNT; s++) {
                 float t = s / (float) (RING_COUNT - 1);
