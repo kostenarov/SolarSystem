@@ -229,5 +229,6 @@ public class MenuScreen extends ScreenAdapter implements SystemEditorWindow.List
     public void dispose() {
         stage.dispose();
         starField.dispose();
+        editorWindow.dispose();
     }
 }

@@ -6,6 +6,7 @@ import io.kostenarov.SolarSystem.system.BodyConfig;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 
 /**
@@ -72,6 +74,7 @@ public class SystemEditorWindow extends Window {
     private final List<EditableBody> bodyList;
     private final Table form;
     private final Label statusLabel;
+    private final SystemPreview preview;
 
     private String loadedName;       // save the editor contents came from, overwritten without asking
     private String pendingOverwrite; // existing save the user has been warned about once
@@ -90,7 +93,7 @@ public class SystemEditorWindow extends Window {
         fileBar.add(new Label("Save as", skin));
         fileBar.add(fileNameField).width(220);
         fileBar.add(button(" Save ", this::save));
-        add(fileBar).colspan(2).left();
+        add(fileBar).colspan(3).left();
         row();
 
         // Body list and its buttons
@@ -124,19 +127,47 @@ public class SystemEditorWindow extends Window {
         formScroll.setFadeScrollBars(false);
         formScroll.setScrollingDisabled(true, false);
 
+        // Live map of the system; clicking a body selects it
+        preview = new SystemPreview(skin.getFont("default"));
+        preview.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String name = preview.bodyAt(x, y);
+                for (int i = 0; i < bodies.size; i++) {
+                    if (bodies.get(i).config.name.equals(name)) {
+                        select(bodies.get(i));
+                        return;
+                    }
+                }
+            }
+        });
+
         add(left).top();
         add(formScroll).width(420).height(372).top();
+        add(preview).width(380).height(372).top();
         row();
 
         statusLabel = new Label("", skin);
         statusLabel.setWrap(true);
         Table bottom = new Table();
-        bottom.add(statusLabel).width(450).left().expandX();
+        bottom.add(statusLabel).width(760).left().expandX();
         bottom.add(button(" Start simulation ", this::apply)).padRight(6);
         bottom.add(button(" Close ", () -> setVisible(false)));
-        add(bottom).colspan(2).fillX();
+        add(bottom).colspan(3).fillX();
 
         pack();
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        if (isVisible()) {
+            preview.setSystem(export(), selected != null ? selected.config.name : null);
+        }
+    }
+
+    public void dispose() {
+        preview.dispose();
     }
 
     /** Shows the window editing a copy of the given system. */
