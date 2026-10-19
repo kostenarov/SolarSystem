@@ -38,6 +38,11 @@ public final class SystemFiles {
         return names;
     }
 
+    /** Absolute path of the saves folder, to tell the user where their files are. */
+    public static String savesFolderPath() {
+        return Gdx.files.local(SAVES_DIR).file().getAbsolutePath();
+    }
+
     public static FileHandle saveFile(String name) {
         return Gdx.files.local(SAVES_DIR + "/" + name + EXTENSION);
     }

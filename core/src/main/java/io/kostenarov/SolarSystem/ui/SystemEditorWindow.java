@@ -22,13 +22,16 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Array;
 
 /**
- * Lets the user build a solar system body by body, save it to saves/&lt;name&gt;.json, load
- * existing saves, and restart the simulation with the edited system.
+ * Opened from the start menu: lets the user build a solar system body by body, save it to
+ * saves/&lt;name&gt;.json, and start the simulation with it.
  */
 public class SystemEditorWindow extends Window {
 
     public interface Listener {
+        /** "Start simulation" was clicked with a valid system. */
         void onSystemApplied(BodyConfig[] configs, String name);
+
+        void onSystemSaved(String name);
     }
 
     private interface DoubleSetter {
@@ -64,10 +67,8 @@ public class SystemEditorWindow extends Window {
     private final Listener listener;
     private final Array<EditableBody> bodies = new Array<>();
     private EditableBody selected;
-    private boolean initialised = false;
 
     private final TextField fileNameField;
-    private final SelectBox<String> savesBox;
     private final List<EditableBody> bodyList;
     private final Table form;
     private final Label statusLabel;
@@ -84,17 +85,11 @@ public class SystemEditorWindow extends Window {
 
         // File bar
         fileNameField = new TextField("", skin);
-        savesBox = new SelectBox<>(skin);
         Table fileBar = new Table();
         fileBar.defaults().padRight(6);
-        fileBar.add(new Label("Name", skin));
-        fileBar.add(fileNameField).width(170);
+        fileBar.add(new Label("Save as", skin));
+        fileBar.add(fileNameField).width(220);
         fileBar.add(button(" Save ", this::save));
-        fileBar.add().width(20);
-        fileBar.add(new Label("Saves", skin));
-        fileBar.add(savesBox).width(170);
-        fileBar.add(button(" Load ", this::loadSelectedSave));
-        fileBar.add(button(" New ", this::newSystem));
         add(fileBar).colspan(2).left();
         row();
 
@@ -137,20 +132,27 @@ public class SystemEditorWindow extends Window {
         statusLabel.setWrap(true);
         Table bottom = new Table();
         bottom.add(statusLabel).width(450).left().expandX();
-        bottom.add(button(" Apply to simulation ", this::apply)).padRight(6);
+        bottom.add(button(" Start simulation ", this::apply)).padRight(6);
         bottom.add(button(" Close ", () -> setVisible(false)));
         add(bottom).colspan(2).fillX();
 
         pack();
     }
 
-    /** Shows the window. The first time, it starts from the system currently being simulated. */
-    public void open(BodyConfig[] currentSystem, String currentName) {
-        if (!initialised) {
-            setSystem(currentSystem, currentName);
-            initialised = true;
-        }
-        refreshSaves();
+    /** Shows the window editing a copy of the given system. */
+    public void open(BodyConfig[] system, String name) {
+        setStatus("Editing " + name + ".", false);
+        setSystem(system, name); // may replace the status with a warning about the file
+        show();
+    }
+
+    /** Shows the window with a new system containing only a star. */
+    public void openNew() {
+        newSystem();
+        show();
+    }
+
+    private void show() {
         setVisible(true);
         toFront();
         if (getStage() != null) {
@@ -178,20 +180,6 @@ public class SystemEditorWindow extends Window {
         setStatus("Started a new system with a star. Use Add planet to fill it.", false);
     }
 
-    private void loadSelectedSave() {
-        String name = savesBox.getSelected();
-        if (name == null) {
-            setStatus("There are no saves in the " + SystemFiles.SAVES_DIR + " folder yet.", true);
-            return;
-        }
-        try {
-            setSystem(SystemFiles.read(name), name);
-            setStatus("Loaded " + name + ". Click Apply to simulation to run it.", false);
-        } catch (Exception e) {
-            setStatus("Could not read " + name + ": " + e.getMessage(), true);
-        }
-    }
-
     private void save() {
         String name = fileNameField.getText().trim();
         if (!SystemFiles.isValidSaveName(name)) {
@@ -217,9 +205,8 @@ public class SystemEditorWindow extends Window {
         }
         loadedName = name;
         pendingOverwrite = null;
-        refreshSaves();
-        savesBox.setSelected(name);
         setStatus("Saved to " + SystemFiles.saveFile(name).path(), false);
+        listener.onSystemSaved(name);
     }
 
     private void apply() {
@@ -231,13 +218,6 @@ public class SystemEditorWindow extends Window {
         }
         String name = fileNameField.getText().trim();
         listener.onSystemApplied(configs, name.isEmpty() ? "custom system" : name);
-        setStatus("The simulation restarted with this system.", false);
-    }
-
-    private void refreshSaves() {
-        String previous = savesBox.getSelected();
-        savesBox.setItems(SystemFiles.listSaves());
-        if (previous != null) savesBox.setSelected(previous);
     }
 
     // ---- Body list ----
@@ -249,7 +229,8 @@ public class SystemEditorWindow extends Window {
         }
 
         StringBuilder orphans = new StringBuilder();
-        for (EditableBody b : bodies) {
+        for (int bIndex = 0; bIndex < bodies.size; bIndex++) {
+            EditableBody b = bodies.get(bIndex);
             if (!b.config.orbitsParent()) continue;
             EditableBody parent = findPlanet(b.config.orbitParent);
             if (parent != null && parent != b) {
@@ -281,7 +262,8 @@ public class SystemEditorWindow extends Window {
     }
 
     private EditableBody findPlanet(String name) {
-        for (EditableBody b : bodies) {
+        for (int bIndex = 0; bIndex < bodies.size; bIndex++) {
+            EditableBody b = bodies.get(bIndex);
             if (!b.config.orbitsParent() && name.equals(b.config.name)) return b;
         }
         return null;
@@ -290,10 +272,12 @@ public class SystemEditorWindow extends Window {
     // Shows each planet followed by its moons, and keeps the saved order the same
     private void refreshList() {
         Array<EditableBody> ordered = new Array<>(bodies.size);
-        for (EditableBody b : bodies) {
+        for (int bIndex = 0; bIndex < bodies.size; bIndex++) {
+            EditableBody b = bodies.get(bIndex);
             if (b.isMoon()) continue;
             ordered.add(b);
-            for (EditableBody m : bodies) {
+            for (int mIndex = 0; mIndex < bodies.size; mIndex++) {
+                EditableBody m = bodies.get(mIndex);
                 if (m.parent == b) ordered.add(m);
             }
         }
@@ -318,7 +302,8 @@ public class SystemEditorWindow extends Window {
 
         // Half an AU beyond the farthest planet, so it doesn't start on top of another body
         float farthest = 0f;
-        for (EditableBody b : bodies) {
+        for (int bIndex = 0; bIndex < bodies.size; bIndex++) {
+            EditableBody b = bodies.get(bIndex);
             if (!b.isMoon()) farthest = Math.max(farthest, (float) Math.hypot(b.config.position[0], b.config.position[1]));
         }
         c.position = new float[]{farthest + 0.5f, 0f};
@@ -336,7 +321,8 @@ public class SystemEditorWindow extends Window {
         EditableBody parent = null;
         if (selected != null) parent = selected.isMoon() ? selected.parent : selected;
         if (parent == null) {
-            for (EditableBody b : bodies) {
+            for (int bIndex = 0; bIndex < bodies.size; bIndex++) {
+                EditableBody b = bodies.get(bIndex);
                 if (!b.isMoon()) { parent = b; break; }
             }
         }
@@ -385,7 +371,8 @@ public class SystemEditorWindow extends Window {
         for (int n = 1; ; n++) {
             String name = prefix + " " + n;
             boolean taken = false;
-            for (EditableBody b : bodies) {
+            for (int bIndex = 0; bIndex < bodies.size; bIndex++) {
+                EditableBody b = bodies.get(bIndex);
                 if (name.equals(b.config.name)) { taken = true; break; }
             }
             if (!taken) return name;
@@ -441,7 +428,8 @@ public class SystemEditorWindow extends Window {
         if (body.isMoon()) {
             final SelectBox<String> parentBox = new SelectBox<>(skin);
             Array<String> parents = new Array<>();
-            for (EditableBody b : bodies) {
+            for (int bIndex = 0; bIndex < bodies.size; bIndex++) {
+                EditableBody b = bodies.get(bIndex);
                 if (!b.isMoon() && b != body) parents.add(b.config.name);
             }
             parentBox.setItems(parents);
@@ -536,7 +524,8 @@ public class SystemEditorWindow extends Window {
     private void changeType(EditableBody body, boolean toMoon) {
         if (toMoon == body.isMoon()) return;
         if (toMoon) {
-            for (EditableBody b : bodies) {
+            for (int bIndex = 0; bIndex < bodies.size; bIndex++) {
+                EditableBody b = bodies.get(bIndex);
                 if (b.parent == body) {
                     setStatus(body.config.name + " has moons of its own. Remove them or move them to another planet first.", true);
                     buildForm();
@@ -565,7 +554,8 @@ public class SystemEditorWindow extends Window {
     /** The heaviest star or planet other than the body itself, or null if there is none. */
     private EditableBody primaryFor(EditableBody body) {
         EditableBody primary = null;
-        for (EditableBody b : bodies) {
+        for (int bIndex = 0; bIndex < bodies.size; bIndex++) {
+            EditableBody b = bodies.get(bIndex);
             if (b == body || b.isMoon()) continue;
             if (primary == null || b.config.mass > primary.config.mass) primary = b;
         }
