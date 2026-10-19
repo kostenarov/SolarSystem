@@ -1,0 +1,103 @@
+@startuml
+
+class BodyInitializer {
+  + BodyInitializer():
+  - AU: float
+  - G: double
+  + getAU(): float
+  - initializeBody(Array<CelestialBody>, String, double, double, Color, Vector2, Vector2): CelestialBody
+  - createMoon(Array<CelestialBody>, CelestialBody, String, double, double, double, float, Color): void
+  + initializeBodies(): Array<CelestialBody>
+}
+class CelestialBody {
+  + CelestialBody(String, float, float, Color, Vector2, Vector2):
+  + position: Vector2
+  + velocity: Vector2
+  + mass: float
+  + acceleration: Vector2
+  - trail: Array<Vector2>
+  + color: Color
+  + radius: float
+  + name: String
+  + getMass(): float
+  + getPosition(): Vector2
+  + getRadius(): float
+  + addTrailPoint(Vector2, int): void
+  + getName(): String
+  + getColor(): Color
+  + getTrail(): Array<Vector2>
+  + getVelocity(): Vector2
+}
+class PhysicsEngine {
+  + PhysicsEngine(Array<CelestialBody>):
+  + G: double
+  - bodies: Array<CelestialBody>
+  + update(float): void
+}
+class Renderer {
+  + Renderer():
+  - shape: ShapeRenderer
+  + render(OrthographicCamera, Array<CelestialBody>, float): void
+  + dispose(): void
+}
+class SolarSystemVisualiser {
+  + SolarSystemVisualiser():
+  - camera: OrthographicCamera
+  - bodies: Array<CelestialBody>
+  - engine: PhysicsEngine
+  - TRAIL_MAX_POINTS: int
+  - bodyInitializer: BodyInitializer
+  - stars: Array<Vector2>
+  - TIME_STEP: float
+  - followTarget: CelestialBody
+  - AU: float
+  - starRenderer: ShapeRenderer
+  - uiInitializer: UIInitializer
+  - renderer: Renderer
+  + create(): void
+  + onBodySelected(CelestialBody): void
+  + resize(int, int): void
+  + render(): void
+  + dispose(): void
+  - handleInput(): void
+}
+class UIInitializer {
+  + UIInitializer(Array<CelestialBody>, BodySelectionListener):
+  - dropdownContainer: Table
+  - listener: BodySelectionListener
+  - toggleButton: TextButton
+  - bodyTable: Table
+  - skin: Skin
+  - scrollPane: ScrollPane
+  - bottomMenuTexture: Texture
+  - bodies: Array<CelestialBody>
+  - stage: Stage
+  - pauseButton: ImageButton
+  - pauseTexture: Texture
+  + isOverScrollableArea(float, float): boolean
+  + getStage(): Stage
+  + isUiInFocus(float, float): boolean
+  - createPauseButtonTexture(): Texture
+  + resize(int, int): void
+  - initBottomMenu(): Texture
+  - createBasicSkin(): Skin
+  + dispose(): void
+  + updateBodyList(Array<CelestialBody>): void
+  + getScrollPane(): ScrollPane
+  - initializeUi(): void
+  + pauseButton(): void
+}
+
+BodyInitializer        -[#595959,dashed]->  CelestialBody         : "«create»"
+PhysicsEngine         "1" *-[#595959,plain]-> "bodies\n*" CelestialBody
+SolarSystemVisualiser  -[#595959,dashed]->  BodyInitializer       : "«create»"
+SolarSystemVisualiser "1" *-[#595959,plain]-> "bodyInitializer\n1" BodyInitializer
+SolarSystemVisualiser "1" *-[#595959,plain]-> "bodies\n*" CelestialBody
+SolarSystemVisualiser "1" *-[#595959,plain]-> "engine\n1" PhysicsEngine
+SolarSystemVisualiser  -[#595959,dashed]->  PhysicsEngine         : "«create»"
+SolarSystemVisualiser "1" *-[#595959,plain]-> "renderer\n1" Renderer
+SolarSystemVisualiser  -[#595959,dashed]->  Renderer              : "«create»"
+SolarSystemVisualiser  -[#595959,dashed]->  UIInitializer         : "«create»"
+SolarSystemVisualiser "1" *-[#595959,plain]-> "uiInitializer\n1" UIInitializer
+UIInitializer         "1" *-[#595959,plain]-> "bodies\n*" CelestialBody
+@enduml

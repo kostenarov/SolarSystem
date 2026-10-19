@@ -1,0 +1,38 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "End User", "Views and interacts with the SolarSystem visualization")
+Person(dev, "Developer", "Maintains code using IntelliJ and Gradle")
+
+System_Boundary(solarSystem, "SolarSystem Application") {
+  Container(app, "Desktop Application", "Java (Gradle)", "Runs the simulation and UI")
+  Container(build, "Build & CI", "Gradle", "Builds, runs tests and packages the app")
+  Container(tool, "IDE", "IntelliJ IDEA", "Development environment used by the developer")
+
+  Container_Boundary(coreModule, "core module") {
+    Component(physics, "Physics Engine", "Java", "Simulates gravity, positions and velocities")
+    Component(renderer, "Renderer", "Java / rendering library", "Renders bodies, background and UI")
+    Component(camera, "Camera System", "Java", "Controls view; supports locking to a body (e.g., Sun)")
+    Component(starGen, "Background Star Generator", "Java", "Creates random background stars for rendering")
+    Component(input, "Input Handler", "Java", "Processes user input to control camera and simulation")
+    Component(tests, "Unit Tests (JUnit)", "JUnit + Gradle", "Automated tests for physics and camera behaviour")
+  }
+}
+
+Rel(user, app, "Interacts with / views simulation")
+Rel(dev, tool, app, "Develops & debugs")
+Rel(tool, build, "Invokes Gradle tasks")
+Rel(build, tests, "Runs unit tests")
+Rel(app, physics, "Uses to compute positions and velocities")
+Rel(app, renderer, "Uses to draw scene")
+Rel(renderer, starGen, "Requests random stars for background")
+Rel(renderer, camera, "Queries transform & lock state")
+Rel(input, camera, "Sends control commands (lock/unlock, pan/zoom)")
+Rel(physics, tests, "Verified by")
+Rel(camera, tests, "Verified by")
+
+' Styling (optional)
+SHOW_LEGEND()
+@enduml
