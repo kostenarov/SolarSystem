@@ -11,7 +11,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-import static com.badlogic.gdx.math.MathUtils.random;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.color;
 
 
@@ -28,12 +27,9 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     private CelestialBody followTarget;
     private CelestialBody resetPoint;
 
-    private ShapeRenderer starRenderer;
+    private StarField starField;
     private ShapeRenderer ringRenderer; // added for rings
-    private Array<Vector2> stars;
 
-    private static final long STAR_COUNT = 250000;
-    private static final float STAR_FIELD_RADIUS_MULTIPLIER = 1000000;
     // Simulated seconds between trail points. Physics advances in steps of at least this long,
     // each split into substeps no longer than the integration step setting.
     private static final double TRAIL_SAMPLE_INTERVAL = 60 * 30;
@@ -72,9 +68,8 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         camera.update();
 
         renderer = new Renderer();
-        starRenderer = new ShapeRenderer();
+        starField = new StarField();
         ringRenderer = new ShapeRenderer();
-        generateStars(AU);
 
         uiInitializer = new UIInitializer(new Array<CelestialBody>(), settings, this);
         Gdx.input.setInputProcessor(uiInitializer.getStage());
@@ -128,16 +123,6 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     @Override
     public void onSettingsClosed() {
         settings.save(Gdx.app.getPreferences(SimulationSettings.PREFERENCES_NAME));
-    }
-
-    private void generateStars(float AU) {
-        stars = new Array<>((int) STAR_COUNT);
-        float range = STAR_FIELD_RADIUS_MULTIPLIER * AU;
-        for (int i = 0; i < STAR_COUNT; i++) {
-            float x = random(-range, range);
-            float y = random(-range, range);
-            stars.add(new Vector2(x, y));
-        }
     }
 
     private void handleInput(float delta) {
@@ -251,15 +236,8 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        starRenderer.setProjectionMatrix(camera.combined);
-
-        if(uiInitializer.isDisplayingStars()) {
-            starRenderer.begin(ShapeRenderer.ShapeType.Point);
-            starRenderer.setColor(Color.WHITE);
-            for (Vector2 s : stars) {
-                starRenderer.point(s.x, s.y, 0);
-            }
-            starRenderer.end();
+        if (uiInitializer.isDisplayingStars()) {
+            starField.render(camera);
         }
         // Comparison run first, so the main simulation is drawn on top of it
         if (comparisonBodies != null) {
@@ -332,7 +310,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     public void dispose() {
         settings.save(Gdx.app.getPreferences(SimulationSettings.PREFERENCES_NAME));
         renderer.dispose();
-        if (starRenderer != null) starRenderer.dispose();
+        if (starField != null) starField.dispose();
         if (ringRenderer != null) ringRenderer.dispose();
 
         uiInitializer.dispose();

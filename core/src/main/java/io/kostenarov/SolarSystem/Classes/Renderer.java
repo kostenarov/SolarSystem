@@ -1,6 +1,8 @@
 package io.kostenarov.SolarSystem.Classes;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -8,6 +10,8 @@ import com.badlogic.gdx.utils.Array;
 
 public class Renderer {
     private static final float GHOST_TRAIL_BRIGHTNESS = 0.5f;
+    // Longer trails are drawn using every n-th point, so drawing cost stays bounded
+    private static final int MAX_TRAIL_SEGMENTS = 4000;
 
     private final ShapeRenderer shape;
 
@@ -34,20 +38,26 @@ public class Renderer {
         shape.setProjectionMatrix(camera.combined);
         float brightness = ghost ? GHOST_TRAIL_BRIGHTNESS : 1f;
 
+        // Blending makes the trails fade out towards their oldest end
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
         shape.begin(ShapeRenderer.ShapeType.Line);
         for (CelestialBody body : bodies) {
-            Array<Vector2> trail = body.getTrail();
-            if (trail.size < 2) continue;
+            Trail trail = body.getTrail();
+            int last = trail.size() - 1;
+            if (last < 1) continue;
 
-            for (int i = 0; i < trail.size - 1; i++) {
-                float t = (float) i / (trail.size - 1); // 0 = oldest, 1 = newest
-                Color base = body.getColor();
+            Color base = body.getColor();
+            int stride = Math.max(1, (last + MAX_TRAIL_SEGMENTS - 1) / MAX_TRAIL_SEGMENTS);
+            int i = 0;
+            while (i < last) {
+                int next = Math.min(i + stride, last); // always end on the newest point
+                float t = (float) next / last; // 0 = oldest, 1 = newest
                 float alpha = 0.05f + 0.95f * t;
                 shape.setColor(base.r * brightness, base.g * brightness, base.b * brightness, alpha);
-
-                Vector2 a = trail.get(i);
-                Vector2 b = trail.get(i + 1);
-                shape.line(a.x, a.y, b.x, b.y);
+                shape.line(trail.getX(i), trail.getY(i), trail.getX(next), trail.getY(next));
+                i = next;
             }
         }
         shape.end();

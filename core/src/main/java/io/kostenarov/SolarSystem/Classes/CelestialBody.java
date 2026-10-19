@@ -2,7 +2,6 @@ package io.kostenarov.SolarSystem.Classes;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 
 public class CelestialBody {
     public final String name;
@@ -21,7 +20,7 @@ public class CelestialBody {
     double vx, vy;
     double ax, ay;
 
-    private final Array<Vector2> trail = new Array<>();
+    private final Trail trail = new Trail(SimulationSettings.DEFAULT_TRAIL_LENGTH);
 
     public CelestialBody(String name, float mass, float radius, Color color, Vector2 position, Vector2 velocity, boolean hasRings, boolean isMoon) {
         this.name = name;
@@ -58,7 +57,7 @@ public class CelestialBody {
     public Vector2 getPosition() { return position; }
     public Vector2 getVelocity() { return velocity; }
     public boolean hasRings() { return  hasRings; }
-    public Array<Vector2> getTrail() { return trail; }
+    public Trail getTrail() { return trail; }
 
     void syncFloatState() {
         position.set((float) x, (float) y);
@@ -66,14 +65,7 @@ public class CelestialBody {
     }
 
     public void addTrailPoint(Vector2 pos, int maxPoints) {
-        if (trail.size > 0) {
-            Vector2 last = trail.peek();
-            if (last.epsilonEquals(pos, 0.001f)) return;
-        }
-        trail.add(new Vector2(pos));
-        // Trim in one go, so that lowering the trail length takes effect immediately
-        if (trail.size > maxPoints) {
-            trail.removeRange(0, trail.size - maxPoints - 1);
-        }
+        trail.setMaxPoints(maxPoints);
+        trail.add(pos.x, pos.y);
     }
 }
