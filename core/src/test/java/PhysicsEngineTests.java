@@ -95,4 +95,67 @@ public class PhysicsEngineTests {
         // gravitational attraction should reduce separation
         assertTrue("Distance should decrease after gravity update", distAfter < distBefore);
     }
+
+    @Test
+    public void verlet_conservesEnergyBetterThanEuler() {
+        double eulerError = maxRelativeEnergyErrorOverOneYear(PhysicsEngine.Integrator.SEMI_IMPLICIT_EULER);
+        double verletError = maxRelativeEnergyErrorOverOneYear(PhysicsEngine.Integrator.VELOCITY_VERLET);
+
+        assertTrue("Verlet energy error " + verletError + " should be far below Euler's " + eulerError,
+            verletError < eulerError / 10);
+    }
+
+    @Test
+    public void update_withSubsteps_matchesManualSmallSteps() {
+        Array<CelestialBody> substepped = sunAndEarth();
+        Array<CelestialBody> manual = sunAndEarth();
+        PhysicsEngine substeppedEngine = new PhysicsEngine(substepped, PhysicsEngine.Integrator.VELOCITY_VERLET, 600);
+        PhysicsEngine manualEngine = new PhysicsEngine(manual, PhysicsEngine.Integrator.VELOCITY_VERLET, Double.POSITIVE_INFINITY);
+
+        substeppedEngine.update(3600);
+        for (int i = 0; i < 6; i++) manualEngine.update(600);
+
+        for (int i = 0; i < substepped.size; i++) {
+            assertEquals(manual.get(i).getPosition().x, substepped.get(i).getPosition().x, EPS);
+            assertEquals(manual.get(i).getPosition().y, substepped.get(i).getPosition().y, EPS);
+        }
+    }
+
+    // Earth on a circular orbit, stepped one day at a time for a year
+    private static double maxRelativeEnergyErrorOverOneYear(PhysicsEngine.Integrator integrator) {
+        Array<CelestialBody> bodies = sunAndEarth();
+        PhysicsEngine engine = new PhysicsEngine(bodies, integrator, Double.POSITIVE_INFINITY);
+
+        double initialEnergy = totalEnergy(bodies);
+        double maxError = 0;
+        for (int day = 0; day < 365; day++) {
+            engine.update(86400);
+            maxError = Math.max(maxError, Math.abs((totalEnergy(bodies) - initialEnergy) / initialEnergy));
+        }
+        return maxError;
+    }
+
+    private static Array<CelestialBody> sunAndEarth() {
+        float au = 1.496e11f;
+        float sunMass = 1.989e30f;
+        float orbitalSpeed = (float) Math.sqrt(PhysicsEngine.G * sunMass / au);
+
+        Array<CelestialBody> bodies = new Array<>();
+        bodies.add(new CelestialBody("Sun", sunMass, 7e8f, Color.YELLOW, new Vector2(0f, 0f), new Vector2(0f, 0f)));
+        bodies.add(new CelestialBody("Earth", 5.972e24f, 6.371e6f, Color.BLUE, new Vector2(au, 0f), new Vector2(0f, orbitalSpeed)));
+        return bodies;
+    }
+
+    private static double totalEnergy(Array<CelestialBody> bodies) {
+        double energy = 0;
+        for (int i = 0; i < bodies.size; i++) {
+            CelestialBody a = bodies.get(i);
+            energy += 0.5 * a.getMass() * a.getVelocity().len2();
+            for (int j = i + 1; j < bodies.size; j++) {
+                CelestialBody b = bodies.get(j);
+                energy -= PhysicsEngine.G * a.getMass() * b.getMass() / a.getPosition().dst(b.getPosition());
+            }
+        }
+        return energy;
+    }
 }

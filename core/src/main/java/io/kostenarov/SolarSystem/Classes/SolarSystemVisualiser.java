@@ -47,7 +47,16 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     private static final float PAN_SPEED = 600f;
     private static final float ZOOM_RATE = (float) Math.pow(1.01, 60);
 
+    // Each physics step is split into substeps of at most this many seconds, so that
+    // fast inner moons (Phobos orbits in ~7.6 h) get enough steps per orbit to stay stable
+    private static final double MAX_SUBSTEP = 5 * 60;
+
     private float physicsAccumulator = 0f;
+
+    // Euler copy of the system, simulated alongside the main one only in "Both" mode
+    private UIInitializer.IntegratorMode integratorMode;
+    private Array<CelestialBody> comparisonBodies;
+    private PhysicsEngine comparisonEngine;
 
     private UIInitializer uiInitializer;
     private BodyInitializer bodyInitializer;
@@ -75,7 +84,8 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         uiInitializer = new UIInitializer(bodies, this);
         Gdx.input.setInputProcessor(uiInitializer.getStage());
 
-        engine = new PhysicsEngine(bodies);
+        engine = new PhysicsEngine(bodies, PhysicsEngine.Integrator.VELOCITY_VERLET, MAX_SUBSTEP);
+        applyIntegratorMode(uiInitializer.getIntegratorMode());
         for (CelestialBody body : bodies) {
             if ("Sun".equals(body.getName())) {
                 resetPoint = body;
@@ -140,6 +150,25 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         }
     }
 
+    private void applyIntegratorMode(UIInitializer.IntegratorMode mode) {
+        integratorMode = mode;
+        engine.setIntegrator(mode == UIInitializer.IntegratorMode.EULER
+            ? PhysicsEngine.Integrator.SEMI_IMPLICIT_EULER
+            : PhysicsEngine.Integrator.VELOCITY_VERLET);
+
+        if (mode == UIInitializer.IntegratorMode.BOTH) {
+            // Start the Euler copy from the current state so both runs diverge from the same point
+            comparisonBodies = new Array<>(bodies.size);
+            for (CelestialBody b : bodies) {
+                comparisonBodies.add(new CelestialBody(b));
+            }
+            comparisonEngine = new PhysicsEngine(comparisonBodies, PhysicsEngine.Integrator.SEMI_IMPLICIT_EULER, MAX_SUBSTEP);
+        } else {
+            comparisonBodies = null;
+            comparisonEngine = null;
+        }
+    }
+
     public void resetToSun() {
         if (resetPoint != null) {
             Vector2 p = resetPoint.getPosition();
@@ -157,20 +186,27 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         float delta = Math.min(Gdx.graphics.getDeltaTime(), MAX_FRAME_TIME);
         handleInput(delta);
 
+        if (uiInitializer.getIntegratorMode() != integratorMode) {
+            applyIntegratorMode(uiInitializer.getIntegratorMode());
+        }
+
         // Fixed-step physics: simulated time advances with real time, not with frame count
         if (!uiInitializer.isPaused()) {
             physicsAccumulator += delta * SIM_SECONDS_PER_REAL_SECOND;
             while (physicsAccumulator >= PHYSICS_DT) {
                 engine.update(PHYSICS_DT);
-                addTrailPoints();
+                addTrailPoints(bodies);
+                if (comparisonEngine != null) {
+                    comparisonEngine.update(PHYSICS_DT);
+                    addTrailPoints(comparisonBodies);
+                }
                 physicsAccumulator -= PHYSICS_DT;
             }
         }
 
         if (!uiInitializer.isDisplayingMoonTrails()) {
-            for (CelestialBody b : bodies) {
-                if (b.isMoon) b.getTrail().clear();
-            }
+            clearMoonTrails(bodies);
+            if (comparisonBodies != null) clearMoonTrails(comparisonBodies);
         }
 
         if (followTarget != null) {
@@ -192,6 +228,10 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
                 starRenderer.point(s.x, s.y, 0);
             }
             starRenderer.end();
+        }
+        // Comparison run first, so the main simulation is drawn on top of it
+        if (comparisonBodies != null) {
+            renderer.render(camera, comparisonBodies, VISUAL_RADIUS_SCALE, true);
         }
         renderer.render(camera, bodies, VISUAL_RADIUS_SCALE);
 
@@ -220,11 +260,17 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         uiInitializer.getStage().draw();
     }
 
-    private void addTrailPoints() {
-        for (CelestialBody b : bodies) {
+    private void addTrailPoints(Array<CelestialBody> system) {
+        for (CelestialBody b : system) {
             if (!b.isMoon || uiInitializer.isDisplayingMoonTrails()) {
                 b.addTrailPoint(b.getPosition(), TRAIL_MAX_POINTS);
             }
+        }
+    }
+
+    private static void clearMoonTrails(Array<CelestialBody> system) {
+        for (CelestialBody b : system) {
+            if (b.isMoon) b.getTrail().clear();
         }
     }
 

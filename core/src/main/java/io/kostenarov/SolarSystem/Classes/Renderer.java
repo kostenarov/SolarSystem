@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Array;
 public class Renderer {
     // Bodies are never drawn smaller than this many screen pixels, whatever the zoom
     private static final float MIN_BODY_PIXELS = 3f;
+    private static final float GHOST_TRAIL_BRIGHTNESS = 0.5f;
 
     private final ShapeRenderer shape;
 
@@ -25,7 +26,16 @@ public class Renderer {
     }
 
     public void render(OrthographicCamera camera, Array<CelestialBody> bodies, float visualRadiusScale) {
+        render(camera, bodies, visualRadiusScale, false);
+    }
+
+    /**
+     * @param ghost draw as a comparison run: dimmed trails and hollow bodies, so it can sit
+     *              underneath the main simulation without hiding it
+     */
+    public void render(OrthographicCamera camera, Array<CelestialBody> bodies, float visualRadiusScale, boolean ghost) {
         shape.setProjectionMatrix(camera.combined);
+        float brightness = ghost ? GHOST_TRAIL_BRIGHTNESS : 1f;
 
         shape.begin(ShapeRenderer.ShapeType.Line);
         for (CelestialBody body : bodies) {
@@ -36,7 +46,7 @@ public class Renderer {
                 float t = (float) i / (trail.size - 1); // 0 = oldest, 1 = newest
                 Color base = body.getColor();
                 float alpha = 0.05f + 0.95f * t;
-                shape.setColor(base.r, base.g, base.b, alpha);
+                shape.setColor(base.r * brightness, base.g * brightness, base.b * brightness, alpha);
 
                 Vector2 a = trail.get(i);
                 Vector2 b = trail.get(i + 1);
@@ -45,7 +55,7 @@ public class Renderer {
         }
         shape.end();
 
-        shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.begin(ghost ? ShapeRenderer.ShapeType.Line : ShapeRenderer.ShapeType.Filled);
         for (CelestialBody body : bodies) {
             Color c = body.getColor();
             shape.setColor(c);

@@ -32,13 +32,27 @@ public class UIInitializer {
     private Image bottomMenuImage; // new field
     private CheckBox displayMoonTrailsCheckbox;
     private CheckBox displayStarsCheckbox;
+    private TextButton integratorButton;
 
     private boolean isPaused = false;
     private boolean isDisplayingMoonTrails = true;
     private boolean isDisplayingStars = true;
+    private IntegratorMode integratorMode = IntegratorMode.VERLET;
 
     public interface BodySelectionListener {
         void onBodySelected(CelestialBody body);
+    }
+
+    public enum IntegratorMode {
+        VERLET("Verlet"),
+        EULER("Euler"),
+        BOTH("Both (solid = Verlet, outline = Euler)");
+
+        private final String label;
+
+        IntegratorMode(String label) {
+            this.label = label;
+        }
     }
 
     private class BodyListItem extends Table {
@@ -106,6 +120,7 @@ public class UIInitializer {
         bottomMenuTexture = initBottomMenu();
         createDisplayMoonTrailsCheckbox();
         createDisplayStarsCheckbox();
+        createIntegratorButton();
         initializeUi();
         updateBodyList(bodies);
     }
@@ -207,6 +222,28 @@ public class UIInitializer {
         stage.addActor(displayStarsCheckbox);
     }
 
+    // Cycles Verlet -> Euler -> Both
+    private void createIntegratorButton() {
+        integratorButton = new TextButton(integratorButtonText(), skin);
+        integratorButton.pad(4, 8, 4, 8);
+        integratorButton.setPosition(10, integratorButtonY(Gdx.graphics.getHeight()));
+        integratorButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                IntegratorMode[] modes = IntegratorMode.values();
+                integratorMode = modes[(integratorMode.ordinal() + 1) % modes.length];
+                integratorButton.setText(integratorButtonText());
+                integratorButton.pack();
+            }
+        });
+        integratorButton.pack();
+        stage.addActor(integratorButton);
+    }
+
+    private String integratorButtonText() {
+        return "Integrator: " + integratorMode.label;
+    }
+
     // Checkboxes sit just above the bottom menu bar
     private static float moonTrailsCheckboxY(int screenHeight) {
         return screenHeight / 6 + 20;
@@ -214,6 +251,10 @@ public class UIInitializer {
 
     private static float starsCheckboxY(int screenHeight) {
         return screenHeight / 6 + 50;
+    }
+
+    private static float integratorButtonY(int screenHeight) {
+        return screenHeight / 6 + 80;
     }
 
     private void initializeUi() {
@@ -297,6 +338,7 @@ public class UIInitializer {
 
         displayMoonTrailsCheckbox.setPosition(10, moonTrailsCheckboxY(height));
         displayStarsCheckbox.setPosition(10, starsCheckboxY(height));
+        integratorButton.setPosition(10, integratorButtonY(height));
 
         pauseButton.setPosition((width - pauseButton.getWidth()) / 2, (float) height / 7 - pauseButton.getHeight() - 10);
         //pauseButton.setSize(pauseButton.getWidth() - pauseButton.getWidth() / Gdx.graphics.getWidth(),
@@ -329,4 +371,5 @@ public class UIInitializer {
     public boolean isPaused() { return isPaused; }
     public boolean isDisplayingMoonTrails() { return isDisplayingMoonTrails; }
     public boolean isDisplayingStars() { return isDisplayingStars; }
+    public IntegratorMode getIntegratorMode() { return integratorMode; }
 }

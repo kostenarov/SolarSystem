@@ -12,9 +12,14 @@ public class CelestialBody {
     public boolean hasRings = false;
     public boolean isMoon = false;
 
+    // Float copies of the simulation state, used for rendering and UI. Kept in sync by PhysicsEngine.
     public Vector2 position;
     public Vector2 velocity;
-    public Vector2 acceleration = new Vector2();
+
+    // Simulation state in double precision: a float cannot resolve positions finer than ~16 km at 1 AU
+    double x, y;
+    double vx, vy;
+    double ax, ay;
 
     private final Array<Vector2> trail = new Array<>();
 
@@ -27,10 +32,23 @@ public class CelestialBody {
         this.velocity = velocity;
         this.hasRings = hasRings;
         this.isMoon = isMoon;
+        this.x = position.x;
+        this.y = position.y;
+        this.vx = velocity.x;
+        this.vy = velocity.y;
     }
 
     public CelestialBody(String name, float mass, float radius, Color color, Vector2 position, Vector2 velocity) {
         this(name, mass, radius, color, position, velocity, false, false);
+    }
+
+    /** Copies the body's properties and current state, without its trail. */
+    public CelestialBody(CelestialBody other) {
+        this(other.name, other.mass, other.radius, other.color, new Vector2(other.position), new Vector2(other.velocity), other.hasRings, other.isMoon);
+        this.x = other.x;
+        this.y = other.y;
+        this.vx = other.vx;
+        this.vy = other.vy;
     }
 
     public String getName() { return name; }
@@ -41,6 +59,11 @@ public class CelestialBody {
     public Vector2 getVelocity() { return velocity; }
     public boolean hasRings() { return  hasRings; }
     public Array<Vector2> getTrail() { return trail; }
+
+    void syncFloatState() {
+        position.set((float) x, (float) y);
+        velocity.set((float) vx, (float) vy);
+    }
 
     public void addTrailPoint(Vector2 pos, int maxPoints) {
         if (trail.size > 0) {
