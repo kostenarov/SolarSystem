@@ -1,5 +1,6 @@
 // language: java
 import io.kostenarov.SolarSystem.physics.CelestialBody;
+import io.kostenarov.SolarSystem.physics.PhysicalConstants;
 import io.kostenarov.SolarSystem.physics.PhysicsEngine;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
@@ -138,7 +139,7 @@ public class PhysicsEngineTests {
     private static Array<CelestialBody> sunAndEarth() {
         float au = 1.496e11f;
         float sunMass = 1.989e30f;
-        float orbitalSpeed = (float) Math.sqrt(PhysicsEngine.G * sunMass / au);
+        float orbitalSpeed = (float) Math.sqrt(PhysicalConstants.G * sunMass / au);
 
         Array<CelestialBody> bodies = new Array<>();
         bodies.add(new CelestialBody("Sun", sunMass, 7e8f, Color.YELLOW, new Vector2(0f, 0f), new Vector2(0f, 0f)));
@@ -153,7 +154,7 @@ public class PhysicsEngineTests {
             energy += 0.5 * a.getMass() * a.getVelocity().len2();
             for (int j = i + 1; j < bodies.size; j++) {
                 CelestialBody b = bodies.get(j);
-                energy -= PhysicsEngine.G * a.getMass() * b.getMass() / a.getPosition().dst(b.getPosition());
+                energy -= PhysicalConstants.G * a.getMass() * b.getMass() / a.getPosition().dst(b.getPosition());
             }
         }
         return energy;

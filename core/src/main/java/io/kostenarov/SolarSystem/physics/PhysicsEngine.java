@@ -4,8 +4,6 @@ import com.badlogic.gdx.utils.Array;
 
 public class PhysicsEngine {
 
-    public static final double G = 6.67430e-11;
-
     public enum Integrator {
         // First-order: one force evaluation per step, velocity updated before position
         SEMI_IMPLICIT_EULER("Euler"),
@@ -120,7 +118,7 @@ public class PhysicsEngine {
                 if (distanceSquared == 0) continue;
 
                 // |a| = G * m / r^2 along the unit vector (dx, dy) / r
-                double scale = G / (distanceSquared * Math.sqrt(distanceSquared));
+                double scale = PhysicalConstants.G / (distanceSquared * Math.sqrt(distanceSquared));
                 a.ax += scale * b.mass * dx;
                 a.ay += scale * b.mass * dy;
                 b.ax -= scale * a.mass * dx;
