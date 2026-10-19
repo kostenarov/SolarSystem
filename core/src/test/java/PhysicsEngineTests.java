@@ -1,9 +1,9 @@
 // language: java
+import io.kostenarov.SolarSystem.physics.CelestialBody;
+import io.kostenarov.SolarSystem.physics.PhysicsEngine;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import io.kostenarov.SolarSystem.Classes.CelestialBody;
-import io.kostenarov.SolarSystem.Classes.PhysicsEngine;
 import org.junit.Before;
 import org.junit.Test;
 

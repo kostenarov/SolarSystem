@@ -1,5 +1,14 @@
-package io.kostenarov.SolarSystem.Classes;
+package io.kostenarov.SolarSystem;
 
+import io.kostenarov.SolarSystem.physics.PhysicalConstants;
+import io.kostenarov.SolarSystem.system.BodyConfig;
+import io.kostenarov.SolarSystem.system.BodyInitializer;
+import io.kostenarov.SolarSystem.system.SystemFiles;
+import io.kostenarov.SolarSystem.physics.CelestialBody;
+import io.kostenarov.SolarSystem.physics.PhysicsEngine;
+import io.kostenarov.SolarSystem.render.Renderer;
+import io.kostenarov.SolarSystem.render.StarField;
+import io.kostenarov.SolarSystem.ui.UIInitializer;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;

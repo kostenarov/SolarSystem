@@ -1,5 +1,6 @@
-package io.kostenarov.SolarSystem.Classes;
+package io.kostenarov.SolarSystem.physics;
 
+import io.kostenarov.SolarSystem.SimulationSettings;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 

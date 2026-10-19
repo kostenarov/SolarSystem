@@ -1,5 +1,5 @@
-import io.kostenarov.SolarSystem.Classes.BodyConfig;
-import io.kostenarov.SolarSystem.Classes.SystemFiles;
+import io.kostenarov.SolarSystem.system.BodyConfig;
+import io.kostenarov.SolarSystem.system.SystemFiles;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;

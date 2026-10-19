@@ -1,4 +1,4 @@
-package io.kostenarov.SolarSystem.Classes;
+package io.kostenarov.SolarSystem.render;
 
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;

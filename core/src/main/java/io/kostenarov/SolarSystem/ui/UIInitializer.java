@@ -1,5 +1,8 @@
-package io.kostenarov.SolarSystem.Classes;
+package io.kostenarov.SolarSystem.ui;
 
+import io.kostenarov.SolarSystem.SimulationSettings;
+import io.kostenarov.SolarSystem.physics.CelestialBody;
+import io.kostenarov.SolarSystem.system.BodyConfig;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;

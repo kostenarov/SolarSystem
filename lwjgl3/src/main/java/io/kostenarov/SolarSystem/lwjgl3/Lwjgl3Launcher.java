@@ -1,8 +1,8 @@
 package io.kostenarov.SolarSystem.lwjgl3;
 
+import io.kostenarov.SolarSystem.SolarSystemVisualiser;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import io.kostenarov.SolarSystem.Classes.SolarSystemVisualiser;
 import io.kostenarov.SolarSystem.Main;
 
 public class Lwjgl3Launcher {

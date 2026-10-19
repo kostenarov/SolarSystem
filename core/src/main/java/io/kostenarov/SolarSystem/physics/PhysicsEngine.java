@@ -1,4 +1,4 @@
-package io.kostenarov.SolarSystem.Classes;
+package io.kostenarov.SolarSystem.physics;
 
 import com.badlogic.gdx.utils.Array;
 

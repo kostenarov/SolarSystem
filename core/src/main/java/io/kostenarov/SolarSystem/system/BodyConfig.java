@@ -1,4 +1,4 @@
-package io.kostenarov.SolarSystem.Classes;
+package io.kostenarov.SolarSystem.system;
 
 /**
  * One body as stored in a save file. Planets and stars use position (AU) and velocity (m/s);

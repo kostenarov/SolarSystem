@@ -1,5 +1,8 @@
-package io.kostenarov.SolarSystem.Classes;
+package io.kostenarov.SolarSystem.ui;
 
+import io.kostenarov.SolarSystem.physics.PhysicalConstants;
+import io.kostenarov.SolarSystem.system.SystemFiles;
+import io.kostenarov.SolarSystem.system.BodyConfig;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;

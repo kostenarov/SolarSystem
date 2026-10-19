@@ -1,5 +1,6 @@
-package io.kostenarov.SolarSystem.Classes;
+package io.kostenarov.SolarSystem.ui;
 
+import io.kostenarov.SolarSystem.SimulationSettings;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;

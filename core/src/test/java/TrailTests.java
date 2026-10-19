@@ -1,4 +1,4 @@
-import io.kostenarov.SolarSystem.Classes.Trail;
+import io.kostenarov.SolarSystem.physics.Trail;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

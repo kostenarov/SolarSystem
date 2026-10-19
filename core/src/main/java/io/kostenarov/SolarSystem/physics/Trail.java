@@ -1,4 +1,4 @@
-package io.kostenarov.SolarSystem.Classes;
+package io.kostenarov.SolarSystem.physics;
 
 /**
  * The recent positions of a body, oldest first, in a ring buffer: adding a point when full

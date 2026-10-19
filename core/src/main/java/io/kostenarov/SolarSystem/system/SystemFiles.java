@@ -1,4 +1,4 @@
-package io.kostenarov.SolarSystem.Classes;
+package io.kostenarov.SolarSystem.system;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;

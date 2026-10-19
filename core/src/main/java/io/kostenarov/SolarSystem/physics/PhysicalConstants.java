@@ -1,4 +1,4 @@
-package io.kostenarov.SolarSystem.Classes;
+package io.kostenarov.SolarSystem.physics;
 
 public final class PhysicalConstants {
     /** Gravitational constant, m^3 kg^-1 s^-2. */
