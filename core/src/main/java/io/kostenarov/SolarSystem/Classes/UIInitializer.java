@@ -31,6 +31,7 @@ public class UIInitializer {
     private Texture bottomMenuTexture;
     private Image bottomMenuImage; // new field
     private CheckBox displayMoonTrailsCheckbox;
+    private CheckBox displayStarsCheckbox;
 
     private boolean isPaused = false;
     private boolean isDisplayingMoonTrails = true;
@@ -173,7 +174,7 @@ public class UIInitializer {
 
     private Texture initBottomMenu() {
         Pixmap pixmap = new Pixmap(Gdx.graphics.getWidth(), (int) (Gdx.graphics.getHeight() / 6.5), Pixmap.Format.RGBA8888);
-        pixmap.setColor(new Color(100, 100, 100, 0.5f));
+        pixmap.setColor(new Color(100 / 255f, 100 / 255f, 100 / 255f, 0.5f));
         pixmap.fill();
         Texture texture = new Texture(pixmap);
         pixmap.dispose();
@@ -182,7 +183,7 @@ public class UIInitializer {
 
     private void createDisplayMoonTrailsCheckbox() {
         displayMoonTrailsCheckbox = new CheckBox(" Display Moon Trails", skin);
-        displayMoonTrailsCheckbox.setPosition(10, Gdx.graphics.getHeight() / 6 + 20);
+        displayMoonTrailsCheckbox.setPosition(10, moonTrailsCheckboxY(Gdx.graphics.getHeight()));
         displayMoonTrailsCheckbox.setChecked(true);
         displayMoonTrailsCheckbox.addListener(new ChangeListener() {
             @Override
@@ -194,8 +195,8 @@ public class UIInitializer {
     }
 
     private void createDisplayStarsCheckbox() {
-        CheckBox displayStarsCheckbox = new CheckBox(" Display Stars", skin);
-        displayStarsCheckbox.setPosition(10, Gdx.graphics.getHeight() / 6 + 50);
+        displayStarsCheckbox = new CheckBox(" Display Stars", skin);
+        displayStarsCheckbox.setPosition(10, starsCheckboxY(Gdx.graphics.getHeight()));
         displayStarsCheckbox.setChecked(true);
         displayStarsCheckbox.addListener(new ChangeListener() {
             @Override
@@ -204,6 +205,15 @@ public class UIInitializer {
             }
         });
         stage.addActor(displayStarsCheckbox);
+    }
+
+    // Checkboxes sit just above the bottom menu bar
+    private static float moonTrailsCheckboxY(int screenHeight) {
+        return screenHeight / 6 + 20;
+    }
+
+    private static float starsCheckboxY(int screenHeight) {
+        return screenHeight / 6 + 50;
     }
 
     private void initializeUi() {
@@ -284,6 +294,9 @@ public class UIInitializer {
             bottomMenuImage.setPosition(0, 0);
             bottomMenuImage.setSize(width, (float) height / 6.5f);
         }
+
+        displayMoonTrailsCheckbox.setPosition(10, moonTrailsCheckboxY(height));
+        displayStarsCheckbox.setPosition(10, starsCheckboxY(height));
 
         pauseButton.setPosition((width - pauseButton.getWidth()) / 2, (float) height / 7 - pauseButton.getHeight() - 10);
         //pauseButton.setSize(pauseButton.getWidth() - pauseButton.getWidth() / Gdx.graphics.getWidth(),

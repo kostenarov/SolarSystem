@@ -37,8 +37,17 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     private static final long STAR_COUNT = 250000;
     private static final float STAR_FIELD_RADIUS_MULTIPLIER = 1000000;
     private static final float VISUAL_RADIUS_SCALE = 400f;
-    private static final float TIME_STEP = 60 * 30; //1/2 minutes per frame
+    private static final float PHYSICS_DT = 60 * 30; // 30 simulated minutes per physics step
+    private static final float STEPS_PER_REAL_SECOND = 60f;
+    private static final float SIM_SECONDS_PER_REAL_SECOND = PHYSICS_DT * STEPS_PER_REAL_SECOND;
+    private static final float MAX_FRAME_TIME = 0.25f; // avoids a burst of catch-up steps after a stall
     private static final int TRAIL_MAX_POINTS = 100000;
+
+    // Rates per real second (previously 10 units and 1% zoom per frame at 60 FPS)
+    private static final float PAN_SPEED = 600f;
+    private static final float ZOOM_RATE = (float) Math.pow(1.01, 60);
+
+    private float physicsAccumulator = 0f;
 
     private UIInitializer uiInitializer;
     private BodyInitializer bodyInitializer;
@@ -95,7 +104,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         }
     }
 
-    private void handleInput() {
+    private void handleInput(float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
             if (followTarget == null && bodies.size > 0) {
                 followTarget = bodies.first();
@@ -113,18 +122,20 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         boolean uiInFocus = uiInitializer.isUiInFocus(Gdx.input.getX(), Gdx.input.getY());
 
         if (followTarget == null && !uiInFocus) {
-            if (Gdx.input.isKeyPressed(Input.Keys.A)) camera.translate(-10 * camera.zoom, 0);
-            if (Gdx.input.isKeyPressed(Input.Keys.D)) camera.translate(10 * camera.zoom, 0);
-            if (Gdx.input.isKeyPressed(Input.Keys.W)) camera.translate(0, 10 * camera.zoom);
-            if (Gdx.input.isKeyPressed(Input.Keys.S)) camera.translate(0, -10 * camera.zoom);
+            float pan = PAN_SPEED * camera.zoom * delta;
+            if (Gdx.input.isKeyPressed(Input.Keys.A)) camera.translate(-pan, 0);
+            if (Gdx.input.isKeyPressed(Input.Keys.D)) camera.translate(pan, 0);
+            if (Gdx.input.isKeyPressed(Input.Keys.W)) camera.translate(0, pan);
+            if (Gdx.input.isKeyPressed(Input.Keys.S)) camera.translate(0, -pan);
         }
 
         if (!uiInitializer.isOverScrollableArea(Gdx.input.getX(), Gdx.input.getY())) {
-            if (Gdx.input.isKeyPressed(Input.Keys.Q)) camera.zoom *= 1.01f;
-            if (Gdx.input.isKeyPressed(Input.Keys.E)) camera.zoom *= 0.99f;
+            float zoomFactor = (float) Math.pow(ZOOM_RATE, delta);
+            if (Gdx.input.isKeyPressed(Input.Keys.Q)) camera.zoom *= zoomFactor;
+            if (Gdx.input.isKeyPressed(Input.Keys.E)) camera.zoom /= zoomFactor;
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.R)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             resetToSun();
         }
     }
@@ -143,7 +154,24 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
 
     @Override
     public void render() {
-        handleInput();
+        float delta = Math.min(Gdx.graphics.getDeltaTime(), MAX_FRAME_TIME);
+        handleInput(delta);
+
+        // Fixed-step physics: simulated time advances with real time, not with frame count
+        if (!uiInitializer.isPaused()) {
+            physicsAccumulator += delta * SIM_SECONDS_PER_REAL_SECOND;
+            while (physicsAccumulator >= PHYSICS_DT) {
+                engine.update(PHYSICS_DT);
+                addTrailPoints();
+                physicsAccumulator -= PHYSICS_DT;
+            }
+        }
+
+        if (!uiInitializer.isDisplayingMoonTrails()) {
+            for (CelestialBody b : bodies) {
+                if (b.isMoon) b.getTrail().clear();
+            }
+        }
 
         if (followTarget != null) {
             Vector2 p = followTarget.getPosition();
@@ -151,20 +179,6 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         }
 
         camera.update();
-
-        if(!uiInitializer.isPaused())
-            engine.update(TIME_STEP);
-
-        for (CelestialBody b : bodies) {
-            if(!b.isMoon)
-                b.addTrailPoint(b.getPosition(), TRAIL_MAX_POINTS);
-            else if(uiInitializer.isDisplayingMoonTrails()) {
-                b.addTrailPoint(b.getPosition(), TRAIL_MAX_POINTS);
-            }
-            else {
-                b.getTrail().clear();
-            }
-        }
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -184,31 +198,34 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         ringRenderer.setProjectionMatrix(camera.combined);
         ringRenderer.begin(ShapeRenderer.ShapeType.Line);
         for (CelestialBody b : bodies) {
-            try {
-                if (b.hasRings()) {
-                    Vector2 pos = b.getPosition();
-                    float visualRadius = b.getRadius() * VISUAL_RADIUS_SCALE;
+            if (!b.hasRings()) continue;
 
-                    float inner = visualRadius * 1.5f;
-                    float outer = visualRadius * 2.5f;
-                    int segments = 128;
+            Vector2 pos = b.getPosition();
+            float visualRadius = Renderer.drawRadius(b, VISUAL_RADIUS_SCALE, camera.zoom);
 
-                    int steps = 30;
-                    for (int s = 0; s < steps; s++) {
-                        float t = s / (float) Math.max(1, steps - 1);
-                        float r = inner + (outer - inner) * t;
-                        ringRenderer.setColor(ringColors[s]);
-                        ringRenderer.circle(pos.x, pos.y, r, segments);
-                    }
-                }
-            } catch (Throwable ignored) {
+            float inner = visualRadius * 1.5f;
+            float outer = visualRadius * 2.5f;
+            int segments = 128;
 
+            for (int s = 0; s < ringCount; s++) {
+                float t = s / (float) Math.max(1, ringCount - 1);
+                float r = inner + (outer - inner) * t;
+                ringRenderer.setColor(ringColors[s]);
+                ringRenderer.circle(pos.x, pos.y, r, segments);
             }
         }
         ringRenderer.end();
 
         uiInitializer.getStage().act(Gdx.graphics.getDeltaTime());
         uiInitializer.getStage().draw();
+    }
+
+    private void addTrailPoints() {
+        for (CelestialBody b : bodies) {
+            if (!b.isMoon || uiInitializer.isDisplayingMoonTrails()) {
+                b.addTrailPoint(b.getPosition(), TRAIL_MAX_POINTS);
+            }
+        }
     }
 
     private Color getRandomRingColor(int ringNumber) {

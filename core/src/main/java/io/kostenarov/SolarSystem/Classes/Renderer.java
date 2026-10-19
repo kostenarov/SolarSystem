@@ -8,7 +8,16 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class Renderer {
+    // Bodies are never drawn smaller than this many screen pixels, whatever the zoom
+    private static final float MIN_BODY_PIXELS = 3f;
+
     private final ShapeRenderer shape;
+
+    // Radius in world units that a body is drawn with. With the camera viewport sized to the
+    // window, one screen pixel covers camera.zoom world units.
+    public static float drawRadius(CelestialBody body, float visualRadiusScale, float zoom) {
+        return Math.max(MIN_BODY_PIXELS * zoom, body.getRadius() / visualRadiusScale);
+    }
 
     public Renderer() {
         shape = new ShapeRenderer();
@@ -41,8 +50,7 @@ public class Renderer {
             Color c = body.getColor();
             shape.setColor(c);
             Vector2 p = body.getPosition();
-            float drawRadius = Math.max(1f, body.getRadius() / visualRadiusScale);
-            shape.circle(p.x, p.y, drawRadius, 32);
+            shape.circle(p.x, p.y, drawRadius(body, visualRadiusScale, camera.zoom), 32);
         }
         shape.end();
     }
