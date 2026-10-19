@@ -11,13 +11,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-import java.io.IOException;
-
 import static com.badlogic.gdx.math.MathUtils.random;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.color;
 
 
-public class SolarSystemVisualiser extends ApplicationAdapter implements UIInitializer.BodySelectionListener {
+public class SolarSystemVisualiser extends ApplicationAdapter implements UIInitializer.Listener {
     private int ringCount = 30;
     private float AU;
 
@@ -36,22 +34,22 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
 
     private static final long STAR_COUNT = 250000;
     private static final float STAR_FIELD_RADIUS_MULTIPLIER = 1000000;
-    private static final float VISUAL_RADIUS_SCALE = 400f;
-    private static final float PHYSICS_DT = 60 * 30; // 30 simulated minutes per physics step
-    private static final float STEPS_PER_REAL_SECOND = 60f;
-    private static final float SIM_SECONDS_PER_REAL_SECOND = PHYSICS_DT * STEPS_PER_REAL_SECOND;
+    // Simulated seconds between trail points. Physics advances in steps of at least this long,
+    // each split into substeps no longer than the integration step setting.
+    private static final double TRAIL_SAMPLE_INTERVAL = 60 * 30;
     private static final float MAX_FRAME_TIME = 0.25f; // avoids a burst of catch-up steps after a stall
-    private static final int TRAIL_MAX_POINTS = 100000;
+    private static final String DEFAULT_SYSTEM = "exampleSystem";
 
     // Rates per real second (previously 10 units and 1% zoom per frame at 60 FPS)
     private static final float PAN_SPEED = 600f;
     private static final float ZOOM_RATE = (float) Math.pow(1.01, 60);
 
-    // Each physics step is split into substeps of at most this many seconds, so that
-    // fast inner moons (Phobos orbits in ~7.6 h) get enough steps per orbit to stay stable
-    private static final double MAX_SUBSTEP = 5 * 60;
+    private final SimulationSettings settings = new SimulationSettings();
+    private double physicsAccumulator = 0;
 
-    private float physicsAccumulator = 0f;
+    // The system being simulated, as loaded, so the editor can start from it
+    private BodyConfig[] systemConfigs;
+    private String systemName;
 
     // Euler copy of the system, simulated alongside the main one only in "Both" mode
     private UIInitializer.IntegratorMode integratorMode;
@@ -63,13 +61,10 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
 
     @Override
     public void create() {
+        settings.load(Gdx.app.getPreferences(SimulationSettings.PREFERENCES_NAME));
         bodyInitializer = new BodyInitializer();
-        try {
-            bodies = bodyInitializer.initializeFromJson("saves/exampleSystem.json");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        AU = bodyInitializer.getAU(); // Get AU constant
+        AU = PhysicalConstants.AU;
+        BodyConfig[] initialSystem = SystemFiles.read(DEFAULT_SYSTEM);
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(0, 0, 0);
@@ -81,17 +76,9 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         ringRenderer = new ShapeRenderer();
         generateStars(AU);
 
-        uiInitializer = new UIInitializer(bodies, this);
+        uiInitializer = new UIInitializer(new Array<CelestialBody>(), settings, this);
         Gdx.input.setInputProcessor(uiInitializer.getStage());
-
-        engine = new PhysicsEngine(bodies, PhysicsEngine.Integrator.VELOCITY_VERLET, MAX_SUBSTEP);
-        applyIntegratorMode(uiInitializer.getIntegratorMode());
-        for (CelestialBody body : bodies) {
-            if ("Sun".equals(body.getName())) {
-                resetPoint = body;
-                break;
-            }
-        }
+        loadSystem(initialSystem, DEFAULT_SYSTEM);
 
         for(int i = 0; i < ringCount; i++) {
             ringColors[i] = getRandomRingColor(i);
@@ -99,9 +86,48 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
 
     }
 
+    /** Replaces the simulated system and restarts the simulation from its initial state. */
+    private void loadSystem(BodyConfig[] configs, String name) {
+        systemConfigs = configs;
+        systemName = name;
+        bodies = bodyInitializer.initializeFromConfigs(configs);
+        engine = new PhysicsEngine(bodies, PhysicsEngine.Integrator.VELOCITY_VERLET, settings.integrationStep);
+        applyIntegratorMode(uiInitializer.getIntegratorMode());
+        physicsAccumulator = 0;
+        followTarget = null;
+
+        // Reset (R) centres on the heaviest body, normally the star
+        resetPoint = null;
+        for (CelestialBody body : bodies) {
+            if (resetPoint == null || body.getMass() > resetPoint.getMass()) resetPoint = body;
+        }
+        uiInitializer.updateBodyList(bodies);
+    }
+
     @Override
     public void onBodySelected(CelestialBody body) {
         followTarget = body;
+    }
+
+    @Override
+    public void onSystemApplied(BodyConfig[] configs, String name) {
+        loadSystem(configs, name);
+        resetToSun();
+    }
+
+    @Override
+    public BodyConfig[] getCurrentSystem() {
+        return systemConfigs;
+    }
+
+    @Override
+    public String getCurrentSystemName() {
+        return systemName;
+    }
+
+    @Override
+    public void onSettingsClosed() {
+        settings.save(Gdx.app.getPreferences(SimulationSettings.PREFERENCES_NAME));
     }
 
     private void generateStars(float AU) {
@@ -115,6 +141,8 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     }
 
     private void handleInput(float delta) {
+        if (uiInitializer.isTyping()) return;
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
             if (followTarget == null && bodies.size > 0) {
                 followTarget = bodies.first();
@@ -162,7 +190,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
             for (CelestialBody b : bodies) {
                 comparisonBodies.add(new CelestialBody(b));
             }
-            comparisonEngine = new PhysicsEngine(comparisonBodies, PhysicsEngine.Integrator.SEMI_IMPLICIT_EULER, MAX_SUBSTEP);
+            comparisonEngine = new PhysicsEngine(comparisonBodies, PhysicsEngine.Integrator.SEMI_IMPLICIT_EULER, settings.integrationStep);
         } else {
             comparisonBodies = null;
             comparisonEngine = null;
@@ -192,15 +220,19 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
 
         // Fixed-step physics: simulated time advances with real time, not with frame count
         if (!uiInitializer.isPaused()) {
-            physicsAccumulator += delta * SIM_SECONDS_PER_REAL_SECOND;
-            while (physicsAccumulator >= PHYSICS_DT) {
-                engine.update(PHYSICS_DT);
+            double step = Math.max(TRAIL_SAMPLE_INTERVAL, settings.integrationStep);
+            engine.setMaxSubstep(settings.integrationStep);
+            if (comparisonEngine != null) comparisonEngine.setMaxSubstep(settings.integrationStep);
+
+            physicsAccumulator += delta * settings.timeScale;
+            while (physicsAccumulator >= step) {
+                engine.update(step);
                 addTrailPoints(bodies);
                 if (comparisonEngine != null) {
-                    comparisonEngine.update(PHYSICS_DT);
+                    comparisonEngine.update(step);
                     addTrailPoints(comparisonBodies);
                 }
-                physicsAccumulator -= PHYSICS_DT;
+                physicsAccumulator -= step;
             }
         }
 
@@ -231,9 +263,9 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
         }
         // Comparison run first, so the main simulation is drawn on top of it
         if (comparisonBodies != null) {
-            renderer.render(camera, comparisonBodies, VISUAL_RADIUS_SCALE, true);
+            renderer.render(camera, comparisonBodies, settings, true);
         }
-        renderer.render(camera, bodies, VISUAL_RADIUS_SCALE);
+        renderer.render(camera, bodies, settings);
 
         ringRenderer.setProjectionMatrix(camera.combined);
         ringRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -241,7 +273,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
             if (!b.hasRings()) continue;
 
             Vector2 pos = b.getPosition();
-            float visualRadius = Renderer.drawRadius(b, VISUAL_RADIUS_SCALE, camera.zoom);
+            float visualRadius = Renderer.drawRadius(b, settings, camera.zoom);
 
             float inner = visualRadius * 1.5f;
             float outer = visualRadius * 2.5f;
@@ -263,7 +295,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
     private void addTrailPoints(Array<CelestialBody> system) {
         for (CelestialBody b : system) {
             if (!b.isMoon || uiInitializer.isDisplayingMoonTrails()) {
-                b.addTrailPoint(b.getPosition(), TRAIL_MAX_POINTS);
+                b.addTrailPoint(b.getPosition(), settings.trailLength);
             }
         }
     }
@@ -298,6 +330,7 @@ public class SolarSystemVisualiser extends ApplicationAdapter implements UIIniti
 
     @Override
     public void dispose() {
+        settings.save(Gdx.app.getPreferences(SimulationSettings.PREFERENCES_NAME));
         renderer.dispose();
         if (starRenderer != null) starRenderer.dispose();
         if (ringRenderer != null) ringRenderer.dispose();

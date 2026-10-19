@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -14,7 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import org.w3c.dom.Text;
 
 public class UIInitializer {
 
@@ -25,8 +25,11 @@ public class UIInitializer {
     private Table dropdownContainer;
     private ScrollPane scrollPane;
     private Table bodyTable;
-    private Array<CelestialBody> bodies;
-    private BodySelectionListener listener;
+    private Listener listener;
+    private TextButton settingsButton;
+    private TextButton editorButton;
+    private SettingsWindow settingsWindow;
+    private SystemEditorWindow editorWindow;
     private Texture pauseTexture;
     private Texture bottomMenuTexture;
     private Image bottomMenuImage; // new field
@@ -41,6 +44,11 @@ public class UIInitializer {
 
     public interface BodySelectionListener {
         void onBodySelected(CelestialBody body);
+    }
+
+    public interface Listener extends BodySelectionListener, SettingsWindow.Listener, SystemEditorWindow.Listener {
+        BodyConfig[] getCurrentSystem();
+        String getCurrentSystemName();
     }
 
     public enum IntegratorMode {
@@ -111,18 +119,87 @@ public class UIInitializer {
         }
     }
 
-    public UIInitializer(Array<CelestialBody> bodies, BodySelectionListener listener) {
-        this.bodies = bodies;
+    public UIInitializer(Array<CelestialBody> bodies, SimulationSettings settings, Listener listener) {
         this.listener = listener;
         stage = new Stage(new ScreenViewport());
         skin = createBasicSkin();
+        clearTextFocusOnOutsideClick();
         pauseTexture = createPauseButtonTexture();
         bottomMenuTexture = initBottomMenu();
         createDisplayMoonTrailsCheckbox();
         createDisplayStarsCheckbox();
         createIntegratorButton();
         initializeUi();
+        createWindows(settings);
         updateBodyList(bodies);
+    }
+
+    // Without this a text field keeps keyboard focus after clicking elsewhere, which also
+    // keeps the camera keys disabled
+    private void clearTextFocusOnOutsideClick() {
+        stage.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if (!(event.getTarget() instanceof TextField)) stage.setKeyboardFocus(null);
+                return false;
+            }
+        });
+    }
+
+    private void createWindows(SimulationSettings settings) {
+        settingsWindow = new SettingsWindow(skin, settings, listener);
+        settingsWindow.setVisible(false);
+        stage.addActor(settingsWindow);
+
+        editorWindow = new SystemEditorWindow(skin, listener);
+        editorWindow.setVisible(false);
+        stage.addActor(editorWindow);
+
+        settingsButton = new TextButton(" Settings ", skin);
+        settingsButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (settingsWindow.isVisible()) {
+                    settingsWindow.setVisible(false);
+                    listener.onSettingsClosed();
+                    return;
+                }
+                settingsWindow.refresh();
+                settingsWindow.setPosition((stage.getWidth() - settingsWindow.getWidth()) / 2,
+                    (stage.getHeight() - settingsWindow.getHeight()) / 2);
+                settingsWindow.setVisible(true);
+                settingsWindow.toFront();
+            }
+        });
+        stage.addActor(settingsButton);
+
+        editorButton = new TextButton(" Edit System ", skin);
+        editorButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (editorWindow.isVisible()) {
+                    editorWindow.setVisible(false);
+                } else {
+                    editorWindow.open(listener.getCurrentSystem(), listener.getCurrentSystemName());
+                }
+            }
+        });
+        stage.addActor(editorButton);
+
+        positionTopButtons(Gdx.graphics.getHeight());
+    }
+
+    // "Select Body", "Settings" and "Edit System" side by side in the top-left corner
+    private void positionTopButtons(int height) {
+        float y = height - toggleButton.getHeight() - 10;
+        toggleButton.setPosition(10, y);
+        settingsButton.setPosition(toggleButton.getX() + toggleButton.getWidth() + 10, y);
+        editorButton.setPosition(settingsButton.getX() + settingsButton.getWidth() + 10, y);
+    }
+
+    /** True while a text field has keyboard focus, so key presses are typing, not camera controls. */
+    public boolean isTyping() {
+        return stage.getKeyboardFocus() instanceof TextField;
     }
 
     private Skin createBasicSkin() {
@@ -161,20 +238,73 @@ public class UIInitializer {
         skin.add("default", labelStyle);
 
         CheckBox.CheckBoxStyle checkBoxStyle = new CheckBox.CheckBoxStyle();
-        checkBoxStyle.checkboxOn = skin.newDrawable("white", Color.WHITE); // visible when checked
-        checkBoxStyle.checkboxOff = skin.newDrawable("white", Color.DARK_GRAY); // visible when unchecked
+        checkBoxStyle.checkboxOn = sized(skin, Color.WHITE, 12, 12); // visible when checked
+        checkBoxStyle.checkboxOff = sized(skin, Color.DARK_GRAY, 12, 12); // visible when unchecked
         checkBoxStyle.font = skin.getFont("default");
         checkBoxStyle.fontColor = Color.WHITE;
         skin.add("default", checkBoxStyle);
 
         Slider.SliderStyle sliderStyle = new Slider.SliderStyle();
-        sliderStyle.background = skin.newDrawable("white", new Color(0.15f, 0.15f, 0.15f, 1f));
-        sliderStyle.knob = skin.newDrawable("white", Color.LIGHT_GRAY);
-        sliderStyle.knobOver = skin.newDrawable("white", Color.WHITE);
-        sliderStyle.knobDown = skin.newDrawable("white", Color.DARK_GRAY);
+        sliderStyle.background = sized(skin, new Color(0.3f, 0.3f, 0.3f, 1f), 0, 4);
+        sliderStyle.knob = sized(skin, Color.LIGHT_GRAY, 10, 16);
+        sliderStyle.knobOver = sized(skin, Color.WHITE, 10, 16);
+        sliderStyle.knobDown = sized(skin, Color.GRAY, 10, 16);
         skin.add("default-horizontal", sliderStyle);
 
+        TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle();
+        textFieldStyle.font = skin.getFont("default");
+        textFieldStyle.fontColor = Color.WHITE;
+        textFieldStyle.background = padded(skin.newDrawable("white", new Color(0.18f, 0.18f, 0.18f, 1f)), 5, 3);
+        textFieldStyle.focusedBackground = padded(skin.newDrawable("white", new Color(0.25f, 0.25f, 0.3f, 1f)), 5, 3);
+        textFieldStyle.cursor = sized(skin, Color.WHITE, 1, 0);
+        textFieldStyle.selection = skin.newDrawable("white", new Color(0.3f, 0.45f, 0.8f, 1f));
+        skin.add("default", textFieldStyle);
+
+        List.ListStyle listStyle = new List.ListStyle();
+        listStyle.font = skin.getFont("default");
+        listStyle.fontColorSelected = Color.WHITE;
+        listStyle.fontColorUnselected = Color.LIGHT_GRAY;
+        listStyle.selection = padded(skin.newDrawable("white", new Color(0.3f, 0.45f, 0.8f, 1f)), 5, 2);
+        listStyle.over = padded(skin.newDrawable("white", new Color(0.25f, 0.25f, 0.25f, 1f)), 5, 2);
+        skin.add("default", listStyle);
+
+        SelectBox.SelectBoxStyle selectBoxStyle = new SelectBox.SelectBoxStyle();
+        selectBoxStyle.font = skin.getFont("default");
+        selectBoxStyle.fontColor = Color.WHITE;
+        selectBoxStyle.background = padded(skin.newDrawable("white", Color.DARK_GRAY), 6, 3);
+        selectBoxStyle.backgroundOver = padded(skin.newDrawable("white", Color.GRAY), 6, 3);
+        selectBoxStyle.scrollStyle = scrollPaneStyle;
+        selectBoxStyle.listStyle = listStyle;
+        skin.add("default", selectBoxStyle);
+
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = skin.getFont("default");
+        windowStyle.titleFontColor = Color.WHITE;
+        Drawable windowBackground = skin.newDrawable("white", new Color(0.08f, 0.08f, 0.1f, 0.95f));
+        windowBackground.setLeftWidth(10);
+        windowBackground.setRightWidth(10);
+        windowBackground.setTopHeight(28);
+        windowBackground.setBottomHeight(10);
+        windowStyle.background = windowBackground;
+        skin.add("default", windowStyle);
+
         return skin;
+    }
+
+    // A 1x1 white drawable has no size or padding of its own; these give it some
+    private static Drawable sized(Skin skin, Color color, float minWidth, float minHeight) {
+        Drawable drawable = skin.newDrawable("white", color);
+        drawable.setMinWidth(minWidth);
+        drawable.setMinHeight(minHeight);
+        return drawable;
+    }
+
+    private static Drawable padded(Drawable drawable, float horizontal, float vertical) {
+        drawable.setLeftWidth(horizontal);
+        drawable.setRightWidth(horizontal);
+        drawable.setTopHeight(vertical);
+        drawable.setBottomHeight(vertical);
+        return drawable;
     }
 
     private Texture createPauseButtonTexture() {
@@ -325,7 +455,7 @@ public class UIInitializer {
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
 
-        toggleButton.setPosition(10, height - toggleButton.getHeight() - 10);
+        positionTopButtons(height);
         dropdownContainer.pack();
         float newY = height - toggleButton.getHeight() - dropdownContainer.getPrefHeight() - 20;
         dropdownContainer.setPosition(10, newY);

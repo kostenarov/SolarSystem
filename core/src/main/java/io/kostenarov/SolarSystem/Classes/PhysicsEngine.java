@@ -20,7 +20,7 @@ public class PhysicsEngine {
     }
 
     private final Array<CelestialBody> bodies;
-    private final double maxSubstep;
+    private double maxSubstep;
     private Integrator integrator;
 
     // Verlet reuses the accelerations computed at the end of its previous step
@@ -47,6 +47,10 @@ public class PhysicsEngine {
     public void setIntegrator(Integrator integrator) {
         this.integrator = integrator;
         accelerationsValid = false;
+    }
+
+    public void setMaxSubstep(double maxSubstep) {
+        this.maxSubstep = maxSubstep;
     }
 
     public void update(double deltaTime) {

@@ -1,23 +1,20 @@
 package io.kostenarov.SolarSystem.Classes;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class Renderer {
-    // Bodies are never drawn smaller than this many screen pixels, whatever the zoom
-    private static final float MIN_BODY_PIXELS = 3f;
     private static final float GHOST_TRAIL_BRIGHTNESS = 0.5f;
 
     private final ShapeRenderer shape;
 
     // Radius in world units that a body is drawn with. With the camera viewport sized to the
     // window, one screen pixel covers camera.zoom world units.
-    public static float drawRadius(CelestialBody body, float visualRadiusScale, float zoom) {
-        return Math.max(MIN_BODY_PIXELS * zoom, body.getRadius() / visualRadiusScale);
+    public static float drawRadius(CelestialBody body, SimulationSettings settings, float zoom) {
+        return Math.max(settings.minBodyPixels * zoom, body.getRadius() * settings.bodySizeScale);
     }
 
     public Renderer() {
@@ -25,15 +22,15 @@ public class Renderer {
         shape.setAutoShapeType(true);
     }
 
-    public void render(OrthographicCamera camera, Array<CelestialBody> bodies, float visualRadiusScale) {
-        render(camera, bodies, visualRadiusScale, false);
+    public void render(OrthographicCamera camera, Array<CelestialBody> bodies, SimulationSettings settings) {
+        render(camera, bodies, settings, false);
     }
 
     /**
      * @param ghost draw as a comparison run: dimmed trails and hollow bodies, so it can sit
      *              underneath the main simulation without hiding it
      */
-    public void render(OrthographicCamera camera, Array<CelestialBody> bodies, float visualRadiusScale, boolean ghost) {
+    public void render(OrthographicCamera camera, Array<CelestialBody> bodies, SimulationSettings settings, boolean ghost) {
         shape.setProjectionMatrix(camera.combined);
         float brightness = ghost ? GHOST_TRAIL_BRIGHTNESS : 1f;
 
@@ -60,7 +57,7 @@ public class Renderer {
             Color c = body.getColor();
             shape.setColor(c);
             Vector2 p = body.getPosition();
-            shape.circle(p.x, p.y, drawRadius(body, visualRadiusScale, camera.zoom), 32);
+            shape.circle(p.x, p.y, drawRadius(body, settings, camera.zoom), 32);
         }
         shape.end();
     }

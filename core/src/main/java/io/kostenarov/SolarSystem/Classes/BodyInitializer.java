@@ -3,13 +3,8 @@ package io.kostenarov.SolarSystem.Classes;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import com.badlogic.gdx.utils.Json;
 
 public class BodyInitializer {
 
@@ -91,16 +86,12 @@ public class BodyInitializer {
         bodies.add(moon);
     }
 
-    public Array<CelestialBody> initializeFromJson(String jsonFilePath) throws IOException {
-        String jsonText = Files.readString(Paths.get(jsonFilePath), StandardCharsets.UTF_8);
-        Json json = new Json();
-        BodyConfig[] configs = json.fromJson(BodyConfig[].class, jsonText);
-
+    public Array<CelestialBody> initializeFromConfigs(BodyConfig[] configs) {
         Array<CelestialBody> bodies = new Array<>();
         List<BodyConfig> moonConfigs = new ArrayList<>();
 
         for (BodyConfig c : configs) {
-            if (c.orbitParent != null && !c.orbitParent.isEmpty()) {
+            if (c.orbitsParent()) {
                 moonConfigs.add(c);
                 continue;
             }

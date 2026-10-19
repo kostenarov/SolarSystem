@@ -71,8 +71,9 @@ public class CelestialBody {
             if (last.epsilonEquals(pos, 0.001f)) return;
         }
         trail.add(new Vector2(pos));
+        // Trim in one go, so that lowering the trail length takes effect immediately
         if (trail.size > maxPoints) {
-            trail.removeIndex(0);
+            trail.removeRange(0, trail.size - maxPoints - 1);
         }
     }
 }
