@@ -20,6 +20,12 @@ On Windows, use `gradlew.bat lwjgl3:run`. To build a runnable jar in `lwjgl3/bui
 
 Run the jar from the project root so it finds the `saves/` folder.
 
+To skip the menu, pass `--system <save name>`, and optionally `--select <body name>`:
+
+```bash
+./gradlew lwjgl3:run --args="--system exampleSystem --select Earth"
+```
+
 ## Start menu
 
 The app opens on a menu where you can:
@@ -40,14 +46,18 @@ The app opens on a menu where you can:
 
 | Input | Action |
 | --- | --- |
+| Click a body | Select it and open its info panel. Clicking empty space or pressing Esc closes the panel |
 | Mouse drag / WASD | Pan |
 | Mouse wheel / Q, E | Zoom (the wheel zooms towards the cursor) |
-| F | Follow the body nearest the centre of the screen, or stop following |
+| F | Follow the selected body (or the one nearest the centre of the screen), or stop following |
+| Space | Pause or resume |
 | R | Re-centre on the heaviest body |
-| Select Body | Follow a body from the list |
-| Pause button | Pause or resume |
-| Integrator button | Switch between Verlet, Euler, or both. In **Both** mode, the Euler run is drawn underneath with hollow bodies and dimmer trails, so you can see the two methods drift apart |
+| Bodies | List every body; picking one selects and follows it |
+| Pause, << and >> | Pause or resume, halve or double the simulation speed |
+| Integrator button | Switch between Verlet, Euler, or Verlet + Euler. In **Both** mode, the Euler run is drawn underneath with hollow bodies and dimmer trails, so you can see the two methods drift apart |
 | Menu | Back to the start menu |
+
+The info panel updates live. It shows the body's mass and radius, and its distance, speed, orbital period, eccentricity and semi-major axis relative to what it orbits: a moon's planet, or the heaviest body for everything else. All of these come from the body's current position and velocity, so they change as other bodies pull on it.
 
 ## Settings
 

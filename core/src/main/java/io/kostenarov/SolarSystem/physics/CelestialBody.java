@@ -11,6 +11,8 @@ public class CelestialBody {
     public final Color color;
     public boolean hasRings = false;
     public boolean isMoon = false;
+    /** For a moon, the body it was placed in orbit around; null otherwise. */
+    public CelestialBody orbitParent;
 
     // Float copies of the simulation state, used for rendering and UI. Kept in sync by PhysicsEngine.
     public Vector2 position;

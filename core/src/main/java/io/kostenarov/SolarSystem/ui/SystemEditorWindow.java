@@ -61,8 +61,6 @@ public class SystemEditorWindow extends Window {
 
     private static final String TYPE_PLANET = "Star / planet";
     private static final String TYPE_MOON = "Moon";
-    private static final Color ERROR_COLOR = new Color(1f, 0.45f, 0.45f, 1f);
-    private static final Color OK_COLOR = new Color(0.55f, 0.9f, 0.55f, 1f);
     private static final Color INVALID_FIELD_TINT = new Color(1f, 0.5f, 0.5f, 1f);
 
     private final Skin skin;
@@ -92,7 +90,7 @@ public class SystemEditorWindow extends Window {
         fileBar.defaults().padRight(6);
         fileBar.add(new Label("Save as", skin));
         fileBar.add(fileNameField).width(220);
-        fileBar.add(button(" Save ", this::save));
+        fileBar.add(button("Save", this::save));
         add(fileBar).colspan(3).left();
         row();
 
@@ -105,15 +103,15 @@ public class SystemEditorWindow extends Window {
                 select(bodyList.getSelected());
             }
         });
-        ScrollPane listScroll = new ScrollPane(bodyList, skin);
+        ScrollPane listScroll = new ScrollPane(bodyList, skin, "panel");
         listScroll.setFadeScrollBars(false);
         listScroll.setScrollingDisabled(true, false);
 
         Table listButtons = new Table();
         listButtons.defaults().padRight(4);
-        listButtons.add(button(" Add planet ", this::addPlanet));
-        listButtons.add(button(" Add moon ", this::addMoon));
-        listButtons.add(button(" Remove ", this::removeSelected));
+        listButtons.add(button("Add planet", this::addPlanet));
+        listButtons.add(button("Add moon", this::addMoon));
+        listButtons.add(button("Remove", this::removeSelected));
 
         Table left = new Table();
         left.add(listScroll).width(260).height(340).row();
@@ -151,8 +149,8 @@ public class SystemEditorWindow extends Window {
         statusLabel.setWrap(true);
         Table bottom = new Table();
         bottom.add(statusLabel).width(760).left().expandX();
-        bottom.add(button(" Start simulation ", this::apply)).padRight(6);
-        bottom.add(button(" Close ", () -> setVisible(false)));
+        bottom.add(button("Start simulation", "accent", this::apply)).padRight(6);
+        bottom.add(button("Close", () -> setVisible(false)));
         add(bottom).colspan(3).fillX();
 
         pack();
@@ -484,7 +482,7 @@ public class SystemEditorWindow extends Window {
             addFormRow("Position Y (AU)", numberField(Float.toString(c.position[1]), false, v -> c.position[1] = (float) v));
             addFormRow("Velocity X (m/s)", numberField(Float.toString(c.velocity[0]), false, v -> c.velocity[0] = (float) v));
             addFormRow("Velocity Y (m/s)", numberField(Float.toString(c.velocity[1]), false, v -> c.velocity[1] = (float) v));
-            addFormRow("", button(" Set circular orbit velocity ", () -> {
+            addFormRow("", button("Set circular orbit velocity", () -> {
                 if (setCircularVelocity(body)) buildForm();
             }));
             addHint("Sets the velocity for a circular orbit around the heaviest other star or planet.");
@@ -497,10 +495,8 @@ public class SystemEditorWindow extends Window {
     }
 
     private void addHint(String text) {
-        Label hint = new Label(text, skin);
+        Label hint = new Label(text, skin, "small");
         hint.setWrap(true);
-        hint.setColor(0.6f, 0.6f, 0.6f, 1f);
-        hint.setFontScale(0.85f);
         form.add(hint).colspan(2).width(390).row();
     }
 
@@ -644,7 +640,11 @@ public class SystemEditorWindow extends Window {
     }
 
     private TextButton button(String text, final Runnable action) {
-        TextButton button = new TextButton(text, skin);
+        return button(text, "default", action);
+    }
+
+    private TextButton button(String text, String style, final Runnable action) {
+        TextButton button = new TextButton(text, skin, style);
         button.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -656,6 +656,6 @@ public class SystemEditorWindow extends Window {
 
     private void setStatus(String message, boolean error) {
         statusLabel.setText(message);
-        statusLabel.setColor(error ? ERROR_COLOR : OK_COLOR);
+        statusLabel.setColor(error ? UiSkin.ERROR_TEXT : UiSkin.OK_TEXT);
     }
 }

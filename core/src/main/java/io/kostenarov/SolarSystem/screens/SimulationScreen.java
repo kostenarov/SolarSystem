@@ -22,10 +22,11 @@ import io.kostenarov.SolarSystem.render.Renderer;
 import io.kostenarov.SolarSystem.render.StarField;
 import io.kostenarov.SolarSystem.system.BodyConfig;
 import io.kostenarov.SolarSystem.system.BodyInitializer;
-import io.kostenarov.SolarSystem.ui.UIInitializer;
+import io.kostenarov.SolarSystem.ui.SimulationHud;
+import io.kostenarov.SolarSystem.ui.UiSkin;
 
 /** Simulates and draws one solar system. */
-public class SimulationScreen extends ScreenAdapter implements UIInitializer.Listener {
+public class SimulationScreen extends ScreenAdapter implements SimulationHud.Listener {
     private static final int RING_COUNT = 30;
 
     // Simulated seconds between trail points. Physics advances in steps of at least this long,
@@ -43,6 +44,10 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
     private static final float PAN_SPEED = 600f;
     private static final float ZOOM_RATE = (float) Math.pow(1.01, 60);
     private static final float WHEEL_ZOOM_STEP = 1.15f;
+    // A press that moves less than this many pixels is a click (select), not a drag (pan)
+    private static final int CLICK_TOLERANCE = 4;
+    // Clicks this close to a body's edge, in pixels, still select it
+    private static final float PICK_MARGIN = 8f;
 
     private final Main game;
     private final SimulationSettings settings;
@@ -52,17 +57,19 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
     private final Renderer renderer = new Renderer();
     private final StarField starField = new StarField();
     private final ShapeRenderer ringRenderer = new ShapeRenderer();
-    private final UIInitializer uiInitializer;
+    private final SimulationHud hud;
     private final InputMultiplexer input;
 
     private final Array<CelestialBody> bodies;
     private final PhysicsEngine engine;
     private double physicsAccumulator = 0;
     private CelestialBody followTarget;
+    private CelestialBody selected;
+    private double simulatedSeconds = 0;
     private CelestialBody resetPoint;
 
     // Euler copy of the system, simulated alongside the main one only in "Both" mode
-    private UIInitializer.IntegratorMode integratorMode;
+    private SimulationHud.IntegratorMode integratorMode;
     private Array<CelestialBody> comparisonBodies;
     private PhysicsEngine comparisonEngine;
 
@@ -81,11 +88,11 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
         }
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        uiInitializer = new UIInitializer(game.getSkin(), bodies, settings, this);
-        applyIntegratorMode(uiInitializer.getIntegratorMode());
+        hud = new SimulationHud(game.getSkin(), name, bodies, settings, this);
+        applyIntegratorMode(hud.getIntegratorMode());
         resetToSun();
 
-        input = new InputMultiplexer(uiInitializer.getStage(), new CameraInput());
+        input = new InputMultiplexer(hud.getStage(), new CameraInput());
 
         for (int i = 0; i < RING_COUNT; i++) {
             ringColors[i] = getRandomRingColor(i);
@@ -97,9 +104,40 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
         Gdx.input.setInputProcessor(input);
     }
 
+    private void select(CelestialBody body) {
+        selected = body;
+        hud.showInfo(body);
+    }
+
+    /** Selects the body with this name, if there is one. */
+    public void selectByName(String name) {
+        for (CelestialBody b : bodies) {
+            if (b.getName().equals(name)) {
+                select(b);
+                return;
+            }
+        }
+    }
+
     @Override
-    public void onBodySelected(CelestialBody body) {
+    public void onBodyPicked(CelestialBody body) {
+        select(body);
         followTarget = body;
+    }
+
+    @Override
+    public void onFollowToggled(CelestialBody body) {
+        followTarget = followTarget == body ? null : body;
+    }
+
+    @Override
+    public boolean isFollowing(CelestialBody body) {
+        return followTarget == body;
+    }
+
+    @Override
+    public void onSelectionCleared() {
+        select(null);
     }
 
     @Override
@@ -112,23 +150,32 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
         game.showMenu();
     }
 
-    /** Mouse controls: drag to pan, wheel to zoom towards the cursor. The UI gets first refusal. */
+    /**
+     * Mouse controls: click a body to select it, drag to pan, wheel to zoom towards the cursor.
+     * The UI gets first refusal.
+     */
     private class CameraInput extends InputAdapter {
+        private boolean pressed;
         private boolean dragging;
-        private int lastX, lastY;
+        private int downX, downY, lastX, lastY;
 
         @Override
         public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-            if (uiInitializer.isUiInFocus(screenX, screenY)) return false;
-            dragging = true;
-            lastX = screenX;
-            lastY = screenY;
+            if (hud.isUiInFocus(screenX, screenY)) return false;
+            pressed = true;
+            dragging = false;
+            downX = lastX = screenX;
+            downY = lastY = screenY;
             return true;
         }
 
         @Override
         public boolean touchDragged(int screenX, int screenY, int pointer) {
-            if (!dragging) return false;
+            if (!pressed) return false;
+            if (!dragging && Math.abs(screenX - downX) <= CLICK_TOLERANCE && Math.abs(screenY - downY) <= CLICK_TOLERANCE) {
+                return true;
+            }
+            dragging = true;
             // Dragging the view stops following a body
             followTarget = null;
             camera.translate(-(screenX - lastX) * camera.zoom, (screenY - lastY) * camera.zoom);
@@ -139,15 +186,20 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            dragging = false;
-            return false;
+            if (!pressed) return false;
+            pressed = false;
+            if (!dragging && button == Input.Buttons.LEFT) {
+                // Clicking empty space closes the info panel
+                select(bodyAt(screenX, screenY));
+            }
+            return true;
         }
 
         @Override
         public boolean scrolled(float amountX, float amountY) {
             int x = Gdx.input.getX();
             int y = Gdx.input.getY();
-            if (uiInitializer.isUiInFocus(x, y)) return false;
+            if (hud.isUiInFocus(x, y)) return false;
             zoomAt(x, y, (float) Math.pow(WHEEL_ZOOM_STEP, amountY));
             return true;
         }
@@ -170,13 +222,16 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
     }
 
     private void handleKeys(float delta) {
-        if (uiInitializer.isTyping()) return;
+        if (hud.isTyping()) return;
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
-            followTarget = followTarget == null ? bodyNearestScreenCentre() : null;
+            if (followTarget != null) followTarget = null;
+            else followTarget = selected != null ? selected : bodyNearestScreenCentre();
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) hud.togglePause();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) select(null);
 
-        boolean uiInFocus = uiInitializer.isUiInFocus(Gdx.input.getX(), Gdx.input.getY());
+        boolean uiInFocus = hud.isUiInFocus(Gdx.input.getX(), Gdx.input.getY());
 
         if (followTarget == null && !uiInFocus) {
             float pan = PAN_SPEED * camera.zoom * delta;
@@ -186,7 +241,7 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
             if (Gdx.input.isKeyPressed(Input.Keys.S)) camera.translate(0, -pan);
         }
 
-        if (!uiInitializer.isOverScrollableArea(Gdx.input.getX(), Gdx.input.getY())) {
+        if (!hud.isOverScrollableArea(Gdx.input.getX(), Gdx.input.getY())) {
             float zoomFactor = (float) Math.pow(ZOOM_RATE, delta);
             if (Gdx.input.isKeyPressed(Input.Keys.Q)) camera.zoom *= zoomFactor;
             if (Gdx.input.isKeyPressed(Input.Keys.E)) camera.zoom /= zoomFactor;
@@ -196,6 +251,23 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
         if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             resetToSun();
         }
+    }
+
+    /** The body drawn under (or within a few pixels of) a screen point, or null. */
+    private CelestialBody bodyAt(int screenX, int screenY) {
+        camera.update();
+        camera.unproject(tmp.set(screenX, screenY, 0));
+        CelestialBody nearest = null;
+        float nearestPixels = Float.MAX_VALUE;
+        for (CelestialBody b : bodies) {
+            float pixels = b.getPosition().dst(tmp.x, tmp.y) / camera.zoom;
+            float reach = Renderer.drawRadius(b, settings, camera.zoom) / camera.zoom + PICK_MARGIN;
+            if (pixels <= reach && pixels < nearestPixels) {
+                nearestPixels = pixels;
+                nearest = b;
+            }
+        }
+        return nearest;
     }
 
     private CelestialBody bodyNearestScreenCentre() {
@@ -211,13 +283,13 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
         return nearest;
     }
 
-    private void applyIntegratorMode(UIInitializer.IntegratorMode mode) {
+    private void applyIntegratorMode(SimulationHud.IntegratorMode mode) {
         integratorMode = mode;
-        engine.setIntegrator(mode == UIInitializer.IntegratorMode.EULER
+        engine.setIntegrator(mode == SimulationHud.IntegratorMode.EULER
             ? PhysicsEngine.Integrator.SEMI_IMPLICIT_EULER
             : PhysicsEngine.Integrator.VELOCITY_VERLET);
 
-        if (mode == UIInitializer.IntegratorMode.BOTH) {
+        if (mode == SimulationHud.IntegratorMode.BOTH) {
             // Start the Euler copy from the current state so both runs diverge from the same point
             comparisonBodies = new Array<>(bodies.size);
             for (CelestialBody b : bodies) {
@@ -247,12 +319,12 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
         float delta = Math.min(frameDelta, MAX_FRAME_TIME);
         handleKeys(delta);
 
-        if (uiInitializer.getIntegratorMode() != integratorMode) {
-            applyIntegratorMode(uiInitializer.getIntegratorMode());
+        if (hud.getIntegratorMode() != integratorMode) {
+            applyIntegratorMode(hud.getIntegratorMode());
         }
 
         // Fixed-step physics: simulated time advances with real time, not with frame count
-        if (!uiInitializer.isPaused()) {
+        if (!hud.isPaused()) {
             double step = Math.max(TRAIL_SAMPLE_INTERVAL, settings.integrationStep);
             engine.setMaxSubstep(settings.integrationStep);
             if (comparisonEngine != null) comparisonEngine.setMaxSubstep(settings.integrationStep);
@@ -266,10 +338,11 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
                     addTrailPoints(comparisonBodies);
                 }
                 physicsAccumulator -= step;
+                simulatedSeconds += step;
             }
         }
 
-        if (!uiInitializer.isDisplayingMoonTrails()) {
+        if (!hud.isDisplayingMoonTrails()) {
             clearMoonTrails(bodies);
             if (comparisonBodies != null) clearMoonTrails(comparisonBodies);
         }
@@ -284,7 +357,7 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if (uiInitializer.isDisplayingStars()) {
+        if (hud.isDisplayingStars()) {
             starField.render(camera);
         }
         // Comparison run first, so the main simulation is drawn on top of it
@@ -293,9 +366,9 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
         }
         renderer.render(camera, bodies, settings);
         renderRings();
+        renderSelection();
 
-        uiInitializer.getStage().act(frameDelta);
-        uiInitializer.getStage().draw();
+        hud.render(frameDelta, simulatedSeconds);
     }
 
     private void renderRings() {
@@ -319,9 +392,22 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
         ringRenderer.end();
     }
 
+    // Two accent-coloured rings around the selected body
+    private void renderSelection() {
+        if (selected == null) return;
+        Vector2 p = selected.getPosition();
+        float r = Renderer.drawRadius(selected, settings, camera.zoom);
+        ringRenderer.setProjectionMatrix(camera.combined);
+        ringRenderer.begin(ShapeRenderer.ShapeType.Line);
+        ringRenderer.setColor(UiSkin.ACCENT);
+        ringRenderer.circle(p.x, p.y, r + 5 * camera.zoom, 48);
+        ringRenderer.circle(p.x, p.y, r + 6 * camera.zoom, 48);
+        ringRenderer.end();
+    }
+
     private void addTrailPoints(Array<CelestialBody> system) {
         for (CelestialBody b : system) {
-            if (!b.isMoon || uiInitializer.isDisplayingMoonTrails()) {
+            if (!b.isMoon || hud.isDisplayingMoonTrails()) {
                 b.addTrailPoint(b.getPosition(), settings.trailLength);
             }
         }
@@ -346,7 +432,7 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
     @Override
     public void resize(int width, int height) {
         if (width <= 0 || height <= 0) return;
-        uiInitializer.resize(width, height);
+        hud.resize(width, height);
         camera.viewportWidth = width;
         camera.viewportHeight = height;
     }
@@ -356,6 +442,6 @@ public class SimulationScreen extends ScreenAdapter implements UIInitializer.Lis
         renderer.dispose();
         starField.dispose();
         ringRenderer.dispose();
-        uiInitializer.dispose();
+        hud.dispose();
     }
 }

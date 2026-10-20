@@ -57,7 +57,9 @@ public class BodyInitializer {
         Vector2 pos = new Vector2((float) (parentPos.x + r * Math.cos(angle)), (float) (parentPos.y + r * Math.sin(angle)));
         Vector2 vel = new Vector2((float) (parentVel.x - speed * Math.sin(angle)), (float) (parentVel.y + speed * Math.cos(angle)));
 
-        return new CelestialBody(c.name, (float) c.mass, (float) c.radius, toColor(c.color), pos, vel, c.hasRings, true);
+        CelestialBody moon = new CelestialBody(c.name, (float) c.mass, (float) c.radius, toColor(c.color), pos, vel, c.hasRings, true);
+        moon.orbitParent = parent;
+        return moon;
     }
 
     private static Color toColor(float[] arr) {

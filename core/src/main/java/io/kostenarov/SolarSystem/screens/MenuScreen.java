@@ -31,9 +31,6 @@ import io.kostenarov.SolarSystem.ui.UiSkin;
  * editor, or change the settings.
  */
 public class MenuScreen extends ScreenAdapter implements SystemEditorWindow.Listener, SettingsWindow.Listener {
-    private static final Color ERROR_COLOR = new Color(1f, 0.45f, 0.45f, 1f);
-    private static final Color INFO_COLOR = new Color(0.75f, 0.75f, 0.75f, 1f);
-
     private final Main game;
     private final Skin skin;
     private final Stage stage;
@@ -51,10 +48,9 @@ public class MenuScreen extends ScreenAdapter implements SystemEditorWindow.List
         stage = new Stage(new ScreenViewport());
         UiSkin.clearTextFocusOnOutsideClick(stage);
 
-        Label title = new Label("Solar System Simulator", skin);
-        title.setFontScale(2f);
+        Label title = new Label("Solar System Simulator", skin, "title");
         Label subtitle = new Label("Pick a system to simulate, or build your own.", skin);
-        subtitle.setColor(INFO_COLOR);
+        subtitle.setColor(UiSkin.MUTED_TEXT);
 
         savesList = new List<>(skin);
         // Double-click a save to start it straight away
@@ -64,13 +60,13 @@ public class MenuScreen extends ScreenAdapter implements SystemEditorWindow.List
                 if (getTapCount() == 2) startSelected();
             }
         });
-        ScrollPane savesScroll = new ScrollPane(savesList, skin);
+        ScrollPane savesScroll = new ScrollPane(savesList, skin, "panel");
         savesScroll.setFadeScrollBars(false);
         savesScroll.setScrollingDisabled(true, false);
 
         Table buttons = new Table();
-        buttons.defaults().width(220).height(34).padBottom(8);
-        buttons.add(button("Start simulation", this::startSelected)).row();
+        buttons.defaults().width(220).height(38).padBottom(8);
+        buttons.add(button("Start simulation", "accent", this::startSelected)).row();
         buttons.add(button("Edit selected system", this::editSelected)).row();
         buttons.add(button("Create new system", this::createNew)).row();
         buttons.add(button("Settings", this::openSettings)).padTop(16).row();
@@ -79,21 +75,19 @@ public class MenuScreen extends ScreenAdapter implements SystemEditorWindow.List
         statusLabel = new Label("", skin);
         statusLabel.setWrap(true);
 
-        Label savesHeading = new Label("Saved systems", skin);
-        Label folderHint = new Label("Saves are kept in " + SystemFiles.savesFolderPath(), skin);
-        folderHint.setColor(INFO_COLOR);
-        folderHint.setFontScale(0.85f);
+        Label savesHeading = new Label("Saved systems", skin, "subtitle");
+        Label folderHint = new Label("Saves are kept in " + SystemFiles.savesFolderPath(), skin, "small");
         folderHint.setWrap(true);
 
         Table panel = new Table(skin);
-        panel.setBackground(skin.newDrawable("white", new Color(0.08f, 0.08f, 0.1f, 0.9f)));
-        panel.pad(24);
+        panel.setBackground(skin.newDrawable("white", new Color(0.09f, 0.10f, 0.13f, 0.92f)));
+        panel.pad(28, 32, 24, 32);
         panel.defaults().left();
         panel.add(title).colspan(2).padBottom(4).row();
         panel.add(subtitle).colspan(2).padBottom(20).row();
         panel.add(savesHeading).padBottom(6);
         panel.add().row();
-        panel.add(savesScroll).width(320).height(260).top();
+        panel.add(savesScroll).width(330).height(272).top();
         panel.add(buttons).top().padLeft(20).row();
         panel.add(folderHint).colspan(2).width(560).padTop(8).row();
         panel.add(statusLabel).colspan(2).width(560).padTop(8);
@@ -185,7 +179,11 @@ public class MenuScreen extends ScreenAdapter implements SystemEditorWindow.List
     }
 
     private TextButton button(String text, final Runnable action) {
-        TextButton button = new TextButton(text, skin);
+        return button(text, "default", action);
+    }
+
+    private TextButton button(String text, String style, final Runnable action) {
+        TextButton button = new TextButton(text, skin, style);
         button.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -197,7 +195,7 @@ public class MenuScreen extends ScreenAdapter implements SystemEditorWindow.List
 
     private void setStatus(String message, boolean error) {
         statusLabel.setText(message);
-        statusLabel.setColor(error ? ERROR_COLOR : INFO_COLOR);
+        statusLabel.setColor(error ? UiSkin.ERROR_TEXT : UiSkin.MUTED_TEXT);
     }
 
     @Override

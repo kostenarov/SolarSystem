@@ -40,12 +40,12 @@ public class SettingsWindow extends Window {
         addRow(skin, "Simulation speed", "How much simulated time passes per real second", new SettingRow() {
             float toSlider() { return toLog(settings.timeScale, 360, 30 * 86400); }
             void fromSlider(float t) { settings.timeScale = fromLog(t, 360, 30 * 86400); }
-            String format() { return formatDuration(settings.timeScale) + " / s"; }
+            String format() { return Format.duration(settings.timeScale) + " / s"; }
         });
         addRow(skin, "Integration step", "Smaller is more accurate but slower; large steps break Euler first", new SettingRow() {
             float toSlider() { return toLog(settings.integrationStep, 10, 2 * 86400); }
             void fromSlider(float t) { settings.integrationStep = fromLog(t, 10, 2 * 86400); }
-            String format() { return formatDuration(settings.integrationStep); }
+            String format() { return Format.duration(settings.integrationStep); }
         });
         addRow(skin, "Trail length", "Points of trail kept per body", new SettingRow() {
             float toSlider() { return toLog(settings.trailLength, 10, 100000); }
@@ -55,7 +55,7 @@ public class SettingsWindow extends Window {
         addRow(skin, "Body size", "Drawn radius as a multiple of the real radius (x 1 is true size)", new SettingRow() {
             float toSlider() { return toLog(settings.bodySizeScale, 1, 1000); }
             void fromSlider(float t) { settings.bodySizeScale = (float) fromLog(t, 1, 1000); }
-            String format() { return "x " + String.format("%.3g", settings.bodySizeScale); }
+            String format() { return "x " + Format.f("%.3g", settings.bodySizeScale); }
         });
         addRow(skin, "Minimum body size", "Bodies are never drawn smaller than this", new SettingRow() {
             float toSlider() { return (settings.minBodyPixels - 1) / 19f; }
@@ -63,7 +63,7 @@ public class SettingsWindow extends Window {
             String format() { return (int) settings.minBodyPixels + " px"; }
         });
 
-        TextButton defaultsButton = new TextButton(" Reset to defaults ", skin);
+        TextButton defaultsButton = new TextButton("Reset to defaults", skin);
         defaultsButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -71,7 +71,7 @@ public class SettingsWindow extends Window {
                 refresh();
             }
         });
-        TextButton closeButton = new TextButton(" Close ", skin);
+        TextButton closeButton = new TextButton("Done", skin, "accent");
         closeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -98,9 +98,7 @@ public class SettingsWindow extends Window {
             }
         });
 
-        Label hintLabel = new Label(hint, skin);
-        hintLabel.setColor(0.6f, 0.6f, 0.6f, 1f);
-        hintLabel.setFontScale(0.85f);
+        Label hintLabel = new Label(hint, skin, "small");
 
         row();
         add(new Label(name, skin)).left();
@@ -129,10 +127,4 @@ public class SettingsWindow extends Window {
         return min * Math.pow(max / min, t);
     }
 
-    static String formatDuration(double seconds) {
-        if (seconds < 60) return String.format("%.0f s", seconds);
-        if (seconds < 3600) return String.format("%.1f min", seconds / 60);
-        if (seconds < 86400) return String.format("%.1f h", seconds / 3600);
-        return String.format("%.1f days", seconds / 86400);
-    }
 }

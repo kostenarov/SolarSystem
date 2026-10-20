@@ -1,17 +1,29 @@
 package io.kostenarov.SolarSystem.ui;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 
-/** The skin shared by every screen, built in code from a single white pixel and the default font. */
+/**
+ * The skin shared by every screen, built from the atlas and fonts in assets/ui. The atlas has no
+ * nine-patch borders of its own, so they are defined here.
+ */
 public final class UiSkin {
+    public static final Color ACCENT = new Color(49 / 255f, 169 / 255f, 244 / 255f, 1f);
+    public static final Color TEXT = new Color(0.93f, 0.94f, 0.96f, 1f);
+    public static final Color MUTED_TEXT = new Color(0.66f, 0.70f, 0.78f, 1f);
+    public static final Color ERROR_TEXT = new Color(1f, 0.47f, 0.47f, 1f);
+    public static final Color OK_TEXT = new Color(0.55f, 0.9f, 0.6f, 1f);
+    /** Translucent strip colour for the bars over the simulation. */
+    public static final Color BAR = new Color(0.07f, 0.08f, 0.11f, 0.85f);
 
     private UiSkin() {
     }
@@ -31,99 +43,144 @@ public final class UiSkin {
     }
 
     public static Skin create() {
-        Skin skin = new Skin();
+        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/uiskin.atlas"));
+        Skin skin = new Skin(atlas);
 
-        BitmapFont font = new BitmapFont();
+        BitmapFont font = font(atlas, "font");
+        BitmapFont small = font(atlas, "font-list");
+        BitmapFont subtitle = font(atlas, "font-subtitle");
+        BitmapFont title = font(atlas, "font-window");
         skin.add("default", font);
+        skin.add("small", small);
+        skin.add("subtitle", subtitle);
+        skin.add("title", title);
 
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.WHITE);
-        pixmap.fill();
-        skin.add("white", new Texture(pixmap));
-        pixmap.dispose();
+        // Plain colour drawables used by custom widgets
+        skin.add("bar", skin.newDrawable("white", BAR), Drawable.class);
+        skin.add("list-item-up", skin.newDrawable("white", new Color(0, 0, 0, 0)), Drawable.class);
+        skin.add("list-item-over", skin.newDrawable("white", new Color(1, 1, 1, 0.08f)), Drawable.class);
+        skin.add("list-item-down", skin.newDrawable("white", new Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.35f)), Drawable.class);
 
-        skin.add("list-item-up", skin.newDrawable("white", new Color(0.2f, 0.2f, 0.2f, 1)), Drawable.class);
-        skin.add("list-item-over", skin.newDrawable("white", Color.GRAY), Drawable.class);
-        skin.add("list-item-down", skin.newDrawable("white", Color.LIGHT_GRAY), Drawable.class);
+        // Labels
+        skin.add("default", new Label.LabelStyle(font, TEXT));
+        skin.add("small", new Label.LabelStyle(small, MUTED_TEXT));
+        skin.add("subtitle", new Label.LabelStyle(subtitle, TEXT));
+        skin.add("title", new Label.LabelStyle(title, TEXT));
 
-        TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
-        textButtonStyle.up = skin.newDrawable("white", Color.DARK_GRAY);
-        textButtonStyle.down = skin.newDrawable("white", Color.LIGHT_GRAY);
-        textButtonStyle.over = skin.newDrawable("white", Color.GRAY);
-        textButtonStyle.font = skin.getFont("default");
-        textButtonStyle.fontColor = Color.WHITE;
-        skin.add("default", textButtonStyle);
+        // Buttons: slate with a blue outline on hover and press
+        TextButton.TextButtonStyle button = new TextButton.TextButtonStyle();
+        button.up = nine(atlas, "button-normal", 6, 7, 6, 8, 14, 6);
+        button.over = nine(atlas, "button-normal-over", 6, 7, 6, 8, 14, 6);
+        button.down = nine(atlas, "button-normal-pressed", 6, 7, 6, 8, 14, 6);
+        button.checked = button.down;
+        button.font = font;
+        button.fontColor = TEXT;
+        button.disabledFontColor = MUTED_TEXT;
+        skin.add("default", button);
 
-        ScrollPane.ScrollPaneStyle scrollPaneStyle = new ScrollPane.ScrollPaneStyle();
-        scrollPaneStyle.background = skin.newDrawable("white", new Color(0.1f, 0.1f, 0.1f, 1));
-        scrollPaneStyle.vScroll = skin.newDrawable("white", Color.GRAY);
-        scrollPaneStyle.vScrollKnob = skin.newDrawable("white", Color.LIGHT_GRAY);
-        skin.add("default", scrollPaneStyle);
+        // Flat blue button for the main action on a screen
+        TextButton.TextButtonStyle accent = new TextButton.TextButtonStyle(button);
+        accent.up = padded(skin.newDrawable("white", ACCENT), 14, 7);
+        accent.over = padded(skin.newDrawable("white", ACCENT.cpy().lerp(Color.WHITE, 0.15f)), 14, 7);
+        accent.down = padded(skin.newDrawable("white", ACCENT.cpy().lerp(Color.BLACK, 0.2f)), 14, 7);
+        accent.checked = null;
+        accent.fontColor = Color.WHITE;
+        skin.add("accent", accent);
 
-        Label.LabelStyle labelStyle = new Label.LabelStyle();
-        labelStyle.font = skin.getFont("default");
-        labelStyle.fontColor = Color.WHITE;
-        skin.add("default", labelStyle);
+        // Text-only button for the bars and title rows
+        TextButton.TextButtonStyle flat = new TextButton.TextButtonStyle();
+        flat.up = padded(skin.newDrawable("white", new Color(0, 0, 0, 0)), 10, 6);
+        flat.over = padded(skin.newDrawable("white", new Color(1, 1, 1, 0.1f)), 10, 6);
+        flat.down = padded(skin.newDrawable("white", new Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.4f)), 10, 6);
+        flat.checked = flat.down;
+        flat.font = font;
+        flat.fontColor = TEXT;
+        skin.add("flat", flat);
 
-        CheckBox.CheckBoxStyle checkBoxStyle = new CheckBox.CheckBoxStyle();
-        checkBoxStyle.checkboxOn = sized(skin, Color.WHITE, 12, 12); // visible when checked
-        checkBoxStyle.checkboxOff = sized(skin, Color.DARK_GRAY, 12, 12); // visible when unchecked
-        checkBoxStyle.font = skin.getFont("default");
-        checkBoxStyle.fontColor = Color.WHITE;
-        skin.add("default", checkBoxStyle);
+        ScrollPane.ScrollPaneStyle scroll = new ScrollPane.ScrollPaneStyle();
+        scroll.vScrollKnob = nine(atlas, "scrollbar", 3, 4, 3, 4, 0, 0);
+        scroll.vScrollKnob.setMinWidth(8);
+        skin.add("default", scroll);
 
-        Slider.SliderStyle sliderStyle = new Slider.SliderStyle();
-        sliderStyle.background = sized(skin, new Color(0.3f, 0.3f, 0.3f, 1f), 0, 4);
-        sliderStyle.knob = sized(skin, Color.LIGHT_GRAY, 10, 16);
-        sliderStyle.knobOver = sized(skin, Color.WHITE, 10, 16);
-        sliderStyle.knobDown = sized(skin, Color.GRAY, 10, 16);
-        skin.add("default-horizontal", sliderStyle);
+        // A scroll pane with the slate list background
+        ScrollPane.ScrollPaneStyle panel = new ScrollPane.ScrollPaneStyle(scroll);
+        panel.background = nine(atlas, "list", 4, 6, 4, 6, 4, 4);
+        skin.add("panel", panel);
 
-        TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle();
-        textFieldStyle.font = skin.getFont("default");
-        textFieldStyle.fontColor = Color.WHITE;
-        textFieldStyle.background = padded(skin.newDrawable("white", new Color(0.18f, 0.18f, 0.18f, 1f)), 5, 3);
-        textFieldStyle.focusedBackground = padded(skin.newDrawable("white", new Color(0.25f, 0.25f, 0.3f, 1f)), 5, 3);
-        textFieldStyle.cursor = sized(skin, Color.WHITE, 1, 0);
-        textFieldStyle.selection = skin.newDrawable("white", new Color(0.3f, 0.45f, 0.8f, 1f));
-        skin.add("default", textFieldStyle);
+        CheckBox.CheckBoxStyle checkBox = new CheckBox.CheckBoxStyle();
+        checkBox.checkboxOff = skin.getDrawable("checkbox");
+        checkBox.checkboxOn = skin.getDrawable("checkbox-selected");
+        checkBox.checkboxOver = skin.getDrawable("checkbox-over");
+        checkBox.checkboxOnOver = skin.getDrawable("checkbox-selected-over");
+        checkBox.font = font;
+        checkBox.fontColor = TEXT;
+        skin.add("default", checkBox);
 
-        List.ListStyle listStyle = new List.ListStyle();
-        listStyle.font = skin.getFont("default");
-        listStyle.fontColorSelected = Color.WHITE;
-        listStyle.fontColorUnselected = Color.LIGHT_GRAY;
-        listStyle.selection = padded(skin.newDrawable("white", new Color(0.3f, 0.45f, 0.8f, 1f)), 5, 2);
-        listStyle.over = padded(skin.newDrawable("white", new Color(0.25f, 0.25f, 0.25f, 1f)), 5, 2);
-        skin.add("default", listStyle);
+        Slider.SliderStyle slider = new Slider.SliderStyle();
+        slider.background = nine(atlas, "slider", 4, 4, 4, 4, 0, 0);
+        slider.knob = skin.getDrawable("slider-knob");
+        slider.knobOver = skin.getDrawable("slider-knob-over");
+        slider.knobDown = skin.getDrawable("slider-knob-over");
+        skin.add("default-horizontal", slider);
 
-        SelectBox.SelectBoxStyle selectBoxStyle = new SelectBox.SelectBoxStyle();
-        selectBoxStyle.font = skin.getFont("default");
-        selectBoxStyle.fontColor = Color.WHITE;
-        selectBoxStyle.background = padded(skin.newDrawable("white", Color.DARK_GRAY), 6, 3);
-        selectBoxStyle.backgroundOver = padded(skin.newDrawable("white", Color.GRAY), 6, 3);
-        selectBoxStyle.scrollStyle = scrollPaneStyle;
-        selectBoxStyle.listStyle = listStyle;
-        skin.add("default", selectBoxStyle);
+        TextField.TextFieldStyle textField = new TextField.TextFieldStyle();
+        textField.font = font;
+        textField.fontColor = TEXT;
+        textField.messageFontColor = MUTED_TEXT;
+        textField.background = nine(atlas, "textfield", 6, 6, 6, 6, 8, 4);
+        textField.focusedBackground = nine(atlas, "textfield-selected", 6, 6, 6, 6, 8, 4);
+        textField.cursor = skin.newDrawable("white", TEXT);
+        textField.cursor.setMinWidth(1);
+        textField.selection = skin.newDrawable("white", new Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.5f));
+        skin.add("default", textField);
 
-        Window.WindowStyle windowStyle = new Window.WindowStyle();
-        windowStyle.titleFont = skin.getFont("default");
-        windowStyle.titleFontColor = Color.WHITE;
-        Drawable windowBackground = skin.newDrawable("white", new Color(0.08f, 0.08f, 0.1f, 0.95f));
-        windowBackground.setLeftWidth(10);
-        windowBackground.setRightWidth(10);
-        windowBackground.setTopHeight(28);
-        windowBackground.setBottomHeight(10);
-        windowStyle.background = windowBackground;
-        skin.add("default", windowStyle);
+        List.ListStyle list = new List.ListStyle();
+        list.font = font;
+        list.fontColorSelected = Color.WHITE;
+        list.fontColorUnselected = TEXT;
+        list.selection = padded(skin.newDrawable("white", new Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.55f)), 8, 4);
+        list.over = padded(skin.newDrawable("white", new Color(1, 1, 1, 0.08f)), 8, 4);
+        list.down = list.selection;
+        skin.add("default", list);
+
+        SelectBox.SelectBoxStyle selectBox = new SelectBox.SelectBoxStyle();
+        selectBox.font = font;
+        selectBox.fontColor = TEXT;
+        selectBox.background = nine(atlas, "select-box", 6, 20, 6, 12, 10, 5);
+        selectBox.backgroundOver = nine(atlas, "select-box-open", 6, 20, 6, 12, 10, 5);
+        selectBox.backgroundOpen = selectBox.backgroundOver;
+        selectBox.scrollStyle = panel;
+        selectBox.listStyle = list;
+        skin.add("default", selectBox);
+
+        Window.WindowStyle window = new Window.WindowStyle();
+        window.titleFont = subtitle;
+        window.titleFontColor = Color.WHITE;
+        window.background = nine(atlas, "window", 6, 6, 38, 6, 12, 0);
+        window.background.setTopHeight(40);
+        window.background.setBottomHeight(12);
+        skin.add("default", window);
 
         return skin;
     }
 
-    // A 1x1 white drawable has no size or padding of its own; these give it some
-    private static Drawable sized(Skin skin, Color color, float minWidth, float minHeight) {
-        Drawable drawable = skin.newDrawable("white", color);
-        drawable.setMinWidth(minWidth);
-        drawable.setMinHeight(minHeight);
+    private static BitmapFont font(TextureAtlas atlas, String name) {
+        BitmapFont font = new BitmapFont(Gdx.files.internal("ui/" + name + ".fnt"), atlas.findRegion(name));
+        font.setUseIntegerPositions(true);
+        return font;
+    }
+
+    /**
+     * A nine-patch from an atlas region.
+     * @param left,right,top,bottom border sizes in the region that don't stretch
+     * @param padX,padY space between the drawable's edges and its content
+     */
+    private static Drawable nine(TextureAtlas atlas, String region, int left, int right, int top, int bottom, float padX, float padY) {
+        NinePatchDrawable drawable = new NinePatchDrawable(new NinePatch(atlas.findRegion(region), left, right, top, bottom));
+        drawable.setLeftWidth(left + padX);
+        drawable.setRightWidth(right + padX);
+        drawable.setTopHeight(top + padY);
+        drawable.setBottomHeight(bottom + padY);
         return drawable;
     }
 
